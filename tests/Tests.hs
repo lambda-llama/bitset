@@ -1,97 +1,89 @@
-module Properties where
+module Main (main) where
 
-import Control.Monad( liftM )
-import Prelude hiding ( null )
-import Data.BitSet
-import Data.Foldable ( foldl' )
-import Data.List ( nub )
-import Test.QuickCheck
-import System.IO
+import Control.Applicative ((<$>))
+import Data.List (nub)
 
-import qualified Data.List as List
+import Test.Framework (Test, defaultMain)
+import Test.Framework.Providers.QuickCheck2 (testProperty)
+import Test.QuickCheck (Property, Arbitrary(..), (==>), classify)
 
-
-
-main :: IO ()
-main = do
-  dbgMsg "prop_size: " >> quickCheckWith myargs prop_size
-  dbgMsg "prop_size_insert: " >> quickCheckWith myargs prop_size_insert
-  dbgMsg "prop_size_delete: " >> quickCheckWith myargs prop_size_delete
-  dbgMsg "prop_insert: " >> quickCheckWith myargs prop_insert
-  dbgMsg "prop_delete: " >> quickCheckWith myargs prop_delete
-  dbgMsg "prop_insDelIdempotent: " >> quickCheckWith myargs prop_insDelIdempotent
-  dbgMsg "prop_delDelIdempotent: " >> quickCheckWith myargs prop_delDelIdempotent
-  dbgMsg "prop_insInsIdempotent: " >> quickCheckWith myargs prop_insInsIdempotent
-  dbgMsg "prop_extensional: " >> quickCheckWith myargs prop_extensional
-  dbgMsg "prop_fromList: " >> quickCheckWith myargs prop_fromList
-  dbgMsg "prop_empty: " >> quickCheckWith myargs prop_empty
-  dbgMsg "prop_integral: " >> quickCheckWith (myargs{ maxSize = 40 }) prop_integral
-
-dbgMsg = hPutStr stderr
-
-myargs = stdArgs{ maxSize = 64 }
-
--- * Quickcheck properties
-
-trivial test = classify test "trivial"
-
-prop_size xs =
-    trivial (List.null uxs) $
-    length uxs == size (foldr insert empty uxs)
-        where uxs = nub (map abs xs) :: [Int]
-
-prop_size_insert x s =
-    trivial (null s) $
-    if xa `member` s then size s == size s'
-    else size s + 1 == size s'
-  where s' = insert xa s
-        xa = abs x :: Int
-
-prop_size_delete x s =
-    trivial (null s) $
-    if xa `member` s then size s - 1 == size s'
-    else size s == size s'
-  where s' = delete xa s
-        xa = abs x :: Int
-
-prop_insert x s = xa `member` insert xa s
-    where xa = abs x :: Int
-
-prop_delete x s = not $ xa `member` delete xa s
-    where xa = abs x :: Int
-
-prop_insDelIdempotent x s =
-    classify (not (xa `member` s)) "passed guard" $
-    not (xa `member` s) ==>
-    s == (delete xa . insert xa) s
-  where xa = abs x :: Int
-
-prop_delDelIdempotent x s =
-    classify (xa `member` s) "x in s" $
-    classify (not (xa `member` s)) "x not in s" $
-    delete xa s == (delete xa . delete xa $ s)
-  where xa = abs x :: Int
-
-prop_insInsIdempotent x s = insert xa s == (insert xa . insert xa) s
-    where xa = abs x :: Int
-
-prop_extensional xs = and $ map (`member` s) xsa
-    where s   = foldr insert empty xsa
-          xsa = map abs xs :: [Int]
-
-prop_fromList xs = all (`member` s) xsa
-    where s   = fromList xsa
-          xsa = map abs xs :: [Int]
-
-prop_empty x = not $ xa `member` empty
-    where xa = abs x :: Int
-
-prop_integral x s = trivial (null s) $ xa `member` reconstructed
-  where reconstructed = unsafeFromIntegral (toIntegral xs)
-        xa = abs x :: Int
-        xs = xa `insert` s
-
+import Data.BitSet (BitSet)
+import qualified Data.BitSet as BitSet
 
 
 instance (Arbitrary a, Enum a) => Arbitrary (BitSet a) where
-    arbitrary = sized $ liftM fromList . vector
+    arbitrary = BitSet.fromList <$> arbitrary
+
+
+propSize :: [Int] -> Bool
+propSize = go . nub . map abs where
+  go xs = length xs == BitSet.size (foldr BitSet.insert BitSet.empty xs)
+
+propSizeAfterInsert :: Int -> BitSet Int -> Property
+propSizeAfterInsert x bs =
+    x >= 0 ==> BitSet.size (BitSet.insert x bs) == BitSet.size bs + diff
+  where
+    diff :: Int
+    diff = if x `BitSet.member` bs then 0 else 1
+
+propSizeAfterDelete :: Int -> BitSet Int -> Property
+propSizeAfterDelete x bs =
+    x >= 0 ==> BitSet.size (BitSet.delete x bs) == BitSet.size bs - diff
+  where
+    diff :: Int
+    diff = if x `BitSet.member` bs then 1 else 0
+
+propInsertMember :: Int -> BitSet Int -> Property
+propInsertMember x bs = x >= 0 ==> x `BitSet.member` BitSet.insert x bs
+
+propDeleteMember :: Int -> BitSet Int -> Property
+propDeleteMember x bs = x >= 0 ==> x `BitSet.notMember` BitSet.delete x bs
+
+propInsertDeleteIdempotent :: Int -> BitSet Int -> Property
+propInsertDeleteIdempotent x bs = x `BitSet.notMember` bs && x >= 0 ==>
+                                  bs == BitSet.delete x (BitSet.insert x bs)
+
+propDeleteIdempotent :: Int -> BitSet Int -> Property
+propDeleteIdempotent x bs = x >= 0 ==>
+    classify (x `BitSet.member` bs) "x in bs" $
+    classify (x `BitSet.notMember` bs) "x not in bs" $
+    BitSet.delete x bs == BitSet.delete x (BitSet.delete x bs)
+
+propInsertIdempotent :: Int -> BitSet Int -> Property
+propInsertIdempotent x bs =
+    x >= 0 ==> BitSet.insert x bs == BitSet.insert x (BitSet.insert x bs)
+
+propFromList :: [Int] -> Property
+propFromList xs = all (>= 0) xs ==> all (`BitSet.member` bs) xs where
+  bs :: BitSet Int
+  bs = BitSet.fromList xs
+
+propEmpty :: Int -> Property
+propEmpty x = x >= 0 ==> x `BitSet.notMember` BitSet.empty
+
+propUnsafeFromIntegral :: Int -> BitSet Int -> Property
+propUnsafeFromIntegral x bs =
+    x >= 0 ==> x `BitSet.member` reconstructed
+  where
+    serialized :: Integer
+    serialized = BitSet.toIntegral $ BitSet.insert x bs
+
+    reconstructed :: BitSet Int
+    reconstructed = BitSet.unsafeFromIntegral serialized
+
+
+main :: IO ()
+main = defaultMain tests where
+  tests :: [Test]
+  tests = [ testProperty "size" propSize
+          , testProperty "size after insert" propSizeAfterInsert
+          , testProperty "size after delete" propSizeAfterDelete
+          , testProperty "insert" propInsertMember
+          , testProperty "delete" propDeleteMember
+          , testProperty "insert and delete are idempotent" propInsertDeleteIdempotent
+          , testProperty "delete is idempotent" propDeleteIdempotent
+          , testProperty "insert is idempotent" propInsertIdempotent
+          , testProperty "fromList" propFromList
+          , testProperty "empty" propEmpty
+          , testProperty "unsafe construction from integral" propUnsafeFromIntegral
+          ]

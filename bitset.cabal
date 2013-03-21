@@ -21,18 +21,25 @@ Library
     Ghc-options:        -Wall
     Default-language:   Haskell2010
 
-    Build-depends:      base == 4.6.*
+    Build-depends:      base                    == 4.6.*
 
     Exposed-modules:    Data.BitSet
 
 
 Test-suite bitset-tests
-  Hs-source-dirs: tests
-  Ghc-options:    -Wall
+  Hs-source-dirs:     tests
+  Ghc-options:        -Wall -fno-warn-orphans
+  Default-language:   Haskell2010
 
-  Type:           exitcode-stdio-1.0
-  Main-is:        Tests.hs
+  Type:               exitcode-stdio-1.0
+  Main-is:            Tests.hs
 
-  Build-depends:    base                       == 4.6.*
-                  , QuickCheck                 == 2.4.*
-                  , bitset
+  Build-depends:      base                       == 4.6.*
+                    , QuickCheck                 == 2.4.*
+                    , test-framework             == 0.6.*
+                    , test-framework-quickcheck2 == 0.2.*
+                    , bitset
+
+Source-repository head
+    Type:     git
+    Location: https://github.com/superbobry/bitset

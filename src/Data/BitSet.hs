@@ -24,6 +24,7 @@ module Data.BitSet
     , insert
     , fromList
     , delete
+    , notMember
     , member
     , size
     , toIntegral
@@ -97,6 +98,11 @@ delete x (BS count i) = BS count' (clearBit i e)
 
 {-# INLINE member #-}
 member x (BS _ i) = testBit i (fromEnum x)
+
+-- | /O(testBit on Integer)/ Ask whether the item is in the bit set.
+notMember :: Enum a => a -> BitSet a -> Bool
+notMember bs = not . member bs
+{-# INLINE notMember #-}
 
 {-# INLINE size #-}
 size (BS count _) = count
