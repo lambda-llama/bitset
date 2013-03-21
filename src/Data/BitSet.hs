@@ -19,22 +19,42 @@
 -- confuses two bit sets intended to keep track of different types.
 module Data.BitSet
     ( BitSet
+
+    -- * Operators
+    , (\\)
+
+    -- * Query
+    , null
+    , size
+    , member
+    , notMember
+
+    -- * Construction
     , empty
     , singleton
     , insert
     , delete
+
+    -- * Combine
+    , union
+    , unions
+    , difference
+    , intersection
+
+    -- * Conversion
+
+    -- ** List
     , fromList
-    , notMember
-    , member
-    , null
-    , size
+
+    -- ** Arbitraty integral type
     , toIntegral
     , unsafeFromIntegral
     ) where
 
 import Prelude hiding (null)
 
-import Data.Bits (Bits, testBit, setBit, clearBit, shiftR, popCount)
+import Data.Bits (Bits, (.|.), (.&.), complement,
+                  testBit, setBit, clearBit, shiftR, popCount)
 import Data.Data (Data, Typeable)
 import Data.List (foldl')
 
@@ -52,6 +72,27 @@ instance (Enum a, Show a) => Show (BitSet a) where
 
 instance NFData (BitSet a) where
     rnf (BitSet count i) = rnf count `seq` rnf i `seq` ()
+
+
+-- | Is the bit set empty?
+null :: BitSet a -> Bool
+null (BitSet n _) = n == 0
+{-# INLINE null #-}
+
+-- | /O(1)/ The number of elements in the bit set.
+size :: BitSet a -> Int
+size (BitSet count _) = count
+{-# INLINE size #-}
+
+-- | /O(testBit on Integer)/ Ask whether the item is in the bit set.
+member :: Enum a => a -> BitSet a -> Bool
+member x (BitSet _ i) = testBit i (fromEnum x)
+{-# INLINE member #-}
+
+-- | /O(testBit on Integer)/ Ask whether the item is in the bit set.
+notMember :: Enum a => a -> BitSet a -> Bool
+notMember bs = not . member bs
+{-# INLINE notMember #-}
 
 -- | The empty bit set.
 empty :: BitSet a
@@ -77,29 +118,42 @@ delete x (BitSet count i) = BitSet count' (clearBit i e)
           e      = fromEnum x
 {-# INLINE delete #-}
 
--- | /O(testBit on Integer)/ Ask whether the item is in the bit set.
-member :: Enum a => a -> BitSet a -> Bool
-member x (BitSet _ i) = testBit i (fromEnum x)
-{-# INLINE member #-}
+-- | /O(.|. on Integer)/ The union of two sets.
+union :: Enum a => BitSet a -> BitSet a -> BitSet a
+union (BitSet _count1 i1) (BitSet _count2 i2) = BitSet (popCount i) i where
+  i :: Integer
+  i = i1 .|. i2
+{-# INLINE union #-}
 
--- | /O(testBit on Integer)/ Ask whether the item is in the bit set.
-notMember :: Enum a => a -> BitSet a -> Bool
-notMember bs = not . member bs
-{-# INLINE notMember #-}
+-- | /O(n * .|. on Integer)/ The union of a list of sets.
+unions :: Enum a => [BitSet a] -> BitSet a
+unions = foldl' union empty
+{-# INLINE unions #-}
 
--- | /O(1)/ The number of elements in the bit set.
-size :: BitSet a -> Int
-size (BitSet count _) = count
-{-# INLINE size #-}
+-- | /O(xor on Integer)/ Difference of two sets.
+difference :: Enum a => BitSet a -> BitSet a -> BitSet a
+difference (BitSet _count1 i1) (BitSet _count2 i2) =
+    BitSet (popCount i) i
+  where
+    i :: Integer
+    i = i1 .&. complement i2
+
+(\\) :: Enum a => BitSet a -> BitSet a -> BitSet a
+(\\) = difference
+
+-- | /O(.&. on Integer)/ The intersection of two sets.
+intersection :: Enum a => BitSet a -> BitSet a -> BitSet a
+intersection (BitSet _count1 i1) (BitSet _count2 i2) =
+    BitSet (popCount i) i
+  where
+    i :: Integer
+    i = i1 .&. i2
 
 -- | /O(n * setBit on Integer)/ Make a @BitSet@ from a list of items.
 fromList :: Enum a => [a] -> BitSet a
-fromList xs = BitSet (length xs) (foldl' (\i x -> setBit i (fromEnum x)) 0 xs)
-
--- | Is the bit set empty?
-null :: BitSet a -> Bool
-null (BitSet n _) = n == 0
-{-# INLINE null #-}
+fromList xs = BitSet (popCount i) i where
+  i :: Integer
+  i = foldl' (\b x -> setBit b (fromEnum x)) 0 xs
 
 -- | /O(1)/ Project a bit set to an integer.
 toIntegral :: Integral b => BitSet a -> b
