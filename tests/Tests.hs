@@ -61,16 +61,12 @@ propFromList xs = all (>= 0) xs ==> all (`BitSet.member` bs) xs where
 propEmpty :: Int -> Property
 propEmpty x = x >= 0 ==> x `BitSet.notMember` BitSet.empty
 
-propUnsafeFromIntegral :: Int -> BitSet Int -> Property
-propUnsafeFromIntegral x bs =
-    x >= 0 ==> x `BitSet.member` reconstructed
+propUnsafeFromIntegral :: Int -> Property
+propUnsafeFromIntegral x =
+    x >= 0 ==> bs == BitSet.unsafeFromIntegral (BitSet.toIntegral bs :: Integer)
   where
-    serialized :: Integer
-    serialized = BitSet.toIntegral $ BitSet.insert x bs
-
-    reconstructed :: BitSet Int
-    reconstructed = BitSet.unsafeFromIntegral serialized
-
+    bs :: BitSet Int
+    bs = BitSet.singleton x
 
 main :: IO ()
 main = defaultMain tests where

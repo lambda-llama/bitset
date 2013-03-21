@@ -20,98 +20,91 @@
 module Data.BitSet
     ( BitSet
     , empty
-    , null
+    , singleton
     , insert
-    , fromList
     , delete
+    , fromList
     , notMember
     , member
+    , null
     , size
     , toIntegral
     , unsafeFromIntegral
     ) where
 
-import Prelude hiding ( null )
-import Data.Bits
-import Data.Data
+import Prelude hiding (null)
 
+import Data.Bits (testBit, setBit, clearBit, shiftR, popCount)
+import Data.Data (Data, Typeable)
+import Data.List (foldl')
 
-data BitSet a = BS {-# UNPACK #-} !Int Integer
-                deriving (Eq, Ord, Data, Typeable)
+data BitSet a = BitSet {-# UNPACK #-} !Int Integer
+    deriving (Eq, Ord, Data, Typeable)
 
 instance (Enum a, Show a) => Show (BitSet a) where
-    show (BS _ i :: BitSet a) = "fromList " ++ show (f 0 i)
-        where f _ 0 = []
-              f n x = if testBit x 0
-                      then (toEnum n :: a) : f (n+1) (shiftR x 1)
-                      else f (n+1) (shiftR x 1)
+    show (BitSet _ i :: BitSet a) = "fromList " ++ show (f 0 i) where
+      f _n 0 = []
+      f n x  = if testBit x 0
+               then (toEnum n :: a) : f (n + 1) (shiftR x 1)
+               else f (n + 1) (shiftR x 1)
 
 -- | The empty bit set.
 empty :: BitSet a
+empty = BitSet 0 0
+{-# INLINE empty #-}
 
--- | Is the bit set empty?
-null :: BitSet a -> Bool
+-- | O(setBit on Integer). Create a singleton set.
+singleton :: Enum a => a -> BitSet a
+singleton x = insert x empty
+{-# INLINE singleton #-}
 
 -- | /O(setBit on Integer)/ Insert an item into the bit set.
 insert :: Enum a => a -> BitSet a -> BitSet a
-
--- | /O(n * setBit on Integer)/ Make a @BitSet@ from a list of items.
-fromList :: Enum a => [a] -> BitSet a
+insert x (BitSet count i) = BitSet count' (setBit i e)
+    where count' = if testBit i e then count else count+1
+          e      = fromEnum x
+{-# INLINE insert #-}
 
 -- | /O(clearBit on Integer)/ Delete an item from the bit set.
 delete :: Enum a => a -> BitSet a -> BitSet a
+delete x (BitSet count i) = BitSet count' (clearBit i e)
+    where count' = if testBit i e then count - 1 else count
+          e      = fromEnum x
+{-# INLINE delete #-}
 
 -- | /O(testBit on Integer)/ Ask whether the item is in the bit set.
 member :: Enum a => a -> BitSet a -> Bool
-
--- | /O(1)/ The number of elements in the bit set.
-size :: BitSet a -> Int
-
--- | /O(1)/ Project a bit set to an integer.
-toIntegral :: Integral b => BitSet a -> b
-
--- | /O(n)/ Make a bit set of type @BitSet a@ from an integer. This is unsafe
--- because it is not checked whether the bits set in the integer correspond to
--- values of type @a@. This is only useful as a more efficient alternative to
--- fromList.
-unsafeFromIntegral :: Integral b => b -> BitSet a
-
--- * Implementation
-
-{-# INLINE empty #-}
-empty = BS 0 0
-
-{-# INLINE null #-}
-null (BS n _) = n == 0
-
-{-# INLINE insert #-}
-insert x (BS count i) = BS count' (setBit i e)
-    where count' = if testBit i e then count else count+1
-          e      = fromEnum x
-
-fromList xs = BS (length xs) (foldl (\i x -> setBit i (fromEnum x)) 0 xs)
-
-{-# INLINE delete #-}
-delete x (BS count i) = BS count' (clearBit i e)
-    where count' = if testBit i e then count-1 else count
-          e      = fromEnum x
-
+member x (BitSet _ i) = testBit i (fromEnum x)
 {-# INLINE member #-}
-member x (BS _ i) = testBit i (fromEnum x)
 
 -- | /O(testBit on Integer)/ Ask whether the item is in the bit set.
 notMember :: Enum a => a -> BitSet a -> Bool
 notMember bs = not . member bs
 {-# INLINE notMember #-}
 
+-- | /O(1)/ The number of elements in the bit set.
+size :: BitSet a -> Int
+size (BitSet count _) = count
 {-# INLINE size #-}
-size (BS count _) = count
 
+-- | /O(n * setBit on Integer)/ Make a @BitSet@ from a list of items.
+fromList :: Enum a => [a] -> BitSet a
+fromList xs = BitSet (length xs) (foldl' (\i x -> setBit i (fromEnum x)) 0 xs)
+
+-- | Is the bit set empty?
+null :: BitSet a -> Bool
+null (BitSet n _) = n == 0
+{-# INLINE null #-}
+
+-- | /O(1)/ Project a bit set to an integer.
+toIntegral :: Integral b => BitSet a -> b
+toIntegral (BitSet _ i) = fromIntegral i
 {-# INLINE toIntegral #-}
-toIntegral (BS _ i) = fromIntegral i
 
+-- | /O(n)/ Make a bit set of type @BitSet a@ from an integer. This is unsafe
+-- because it is not checked whether the bits set in the integer correspond to
+-- values of type @a@. This is only useful as a more efficient alternative to
+-- fromList.
+unsafeFromIntegral :: Integral b => b -> BitSet a
+unsafeFromIntegral x = let i = fromIntegral x in BitSet (popCount i) i
 {-# INLINE unsafeFromIntegral #-}
-unsafeFromIntegral x = let i = fromIntegral x in BS (count i) i
-    where count 0 = 0
-          count z | z `mod` 2 == 0 = 1 + count (shiftR z 1)
-                  | otherwise = count (shiftR z 1)
