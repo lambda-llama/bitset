@@ -1,3 +1,6 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+
 -- | A /bit set/ maintains a record of members from a type that can be mapped
 -- into (non-negative) @Int@s. The maximum number of elements that can be
 -- stored is @maxbound :: Int@. Supports insertion, deletion, size, and
@@ -32,7 +35,7 @@ import Data.Bits
 import Data.Data
 
 
-data BitSet a = BS {-# UNPACK #-} !Int {-# UNPACK #-} !Integer
+data BitSet a = BS {-# UNPACK #-} !Int Integer
                 deriving (Eq, Ord, Data, Typeable)
 
 instance (Enum a, Show a) => Show (BitSet a) where
