@@ -61,7 +61,7 @@ import Data.List (foldl')
 
 import Control.DeepSeq (NFData(..))
 
-data BitSet a = BitSet {-# UNPACK #-} !Int Integer
+data BitSet a = BitSet {-# UNPACK #-} !Int !Integer
     deriving (Eq, Ord, Data, Typeable)
 
 instance Enum a => Monoid (BitSet a) where

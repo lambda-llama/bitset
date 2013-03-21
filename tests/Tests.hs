@@ -2,6 +2,7 @@ module Main (main) where
 
 import Control.Applicative ((<$>))
 import Data.List ((\\), intersect, union, nub)
+import Data.Word (Word16)
 
 import Test.Framework (Test, defaultMain)
 import Test.Framework.Providers.QuickCheck2 (testProperty)
@@ -14,106 +15,103 @@ instance (Arbitrary a, Enum a) => Arbitrary (BitSet a) where
     arbitrary = BitSet.fromList <$> arbitrary
 
 
-propSize :: [Int] -> Bool
-propSize = go . nub . map abs where
-  go xs = length xs == BitSet.size (foldr BitSet.insert BitSet.empty xs)
+propSize :: [Word16] -> Bool
+propSize = go . nub where
+  go xs = length xs == BitSet.size (BitSet.fromList xs)
 
-propSizeAfterInsert :: Int -> BitSet Int -> Property
+propSizeAfterInsert :: Word16 -> BitSet Word16 -> Bool
 propSizeAfterInsert x bs =
-    x >= 0 ==> BitSet.size (BitSet.insert x bs) == BitSet.size bs + diff
+    BitSet.size (BitSet.insert x bs) == BitSet.size bs + diff
   where
     diff :: Int
     diff = if x `BitSet.member` bs then 0 else 1
 
-propSizeAfterDelete :: Int -> BitSet Int -> Property
+propSizeAfterDelete :: Word16 -> BitSet Word16 -> Bool
 propSizeAfterDelete x bs =
-    x >= 0 ==> BitSet.size (BitSet.delete x bs) == BitSet.size bs - diff
+    BitSet.size (BitSet.delete x bs) == BitSet.size bs - diff
   where
     diff :: Int
     diff = if x `BitSet.member` bs then 1 else 0
 
-propInsertMember :: Int -> BitSet Int -> Property
-propInsertMember x bs = x >= 0 ==> x `BitSet.member` BitSet.insert x bs
+propInsertMember :: Word16 -> BitSet Word16 -> Bool
+propInsertMember x bs = x `BitSet.member` BitSet.insert x bs
 
-propDeleteMember :: Int -> BitSet Int -> Property
-propDeleteMember x bs = x >= 0 ==> x `BitSet.notMember` BitSet.delete x bs
+propDeleteMember :: Word16 -> BitSet Word16 -> Bool
+propDeleteMember x bs = x `BitSet.notMember` BitSet.delete x bs
 
-propInsertDeleteIdempotent :: Int -> BitSet Int -> Property
-propInsertDeleteIdempotent x bs = x `BitSet.notMember` bs && x >= 0 ==>
-                                  bs == BitSet.delete x (BitSet.insert x bs)
+propInsertDeleteIdempotent :: Word16 -> BitSet Word16 -> Property
+propInsertDeleteIdempotent x bs =
+    x `BitSet.notMember` bs ==> bs == BitSet.delete x (BitSet.insert x bs)
 
-propDeleteIdempotent :: Int -> BitSet Int -> Property
-propDeleteIdempotent x bs = x >= 0 ==>
+propDeleteIdempotent :: Word16 -> BitSet Word16 -> Property
+propDeleteIdempotent x bs =
     classify (x `BitSet.member` bs) "x in bs" $
     classify (x `BitSet.notMember` bs) "x not in bs" $
     BitSet.delete x bs == BitSet.delete x (BitSet.delete x bs)
 
-propInsertIdempotent :: Int -> BitSet Int -> Property
+propInsertIdempotent :: Word16 -> BitSet Word16 -> Bool
 propInsertIdempotent x bs =
-    x >= 0 ==> BitSet.insert x bs == BitSet.insert x (BitSet.insert x bs)
+    BitSet.insert x bs == BitSet.insert x (BitSet.insert x bs)
 
-propFromList :: [Int] -> Property
-propFromList xs = all (>= 0) xs ==> all (`BitSet.member` bs) xs where
-  bs :: BitSet Int
+propFromList :: [Word16] -> Bool
+propFromList xs = all (`BitSet.member` bs) xs where
+  bs :: BitSet Word16
   bs = BitSet.fromList xs
 
-propEmpty :: Int -> Property
-propEmpty x = x >= 0 ==> x `BitSet.notMember` BitSet.empty
+propEmpty :: Word16 -> Bool
+propEmpty x = x `BitSet.notMember` BitSet.empty
 
-propUnsafeFromIntegral :: Int -> Property
+propUnsafeFromIntegral :: Word16 -> Bool
 propUnsafeFromIntegral x =
-    x >= 0 ==> bs == BitSet.unsafeFromIntegral (BitSet.toIntegral bs :: Integer)
+    bs == BitSet.unsafeFromIntegral (BitSet.toIntegral bs :: Integer)
   where
-    bs :: BitSet Int
+    bs :: BitSet Word16
     bs = BitSet.singleton x
 
-propUnions :: [Int] -> Property
-propUnions xs =
-    n >= 0 && all (>= 0) xs ==> all (`BitSet.member` bs) xs
-  where
-    n      = length xs
-    (l, r) = splitAt (n `div` 2) xs
+propUnions :: [Word16] -> Bool
+propUnions xs = all (`BitSet.member` bs) xs where
+  n      = length xs
+  (l, r) = splitAt (n `div` 2) xs
 
-    bs :: BitSet Int
-    bs = BitSet.unions $ map BitSet.fromList [l, r, l, r, l]
+  bs :: BitSet Word16
+  bs = BitSet.unions $ map BitSet.fromList [l, r, l, r, l]
 
-propIntersectionWithSelf :: [Int] -> Property
-propIntersectionWithSelf xs =
-    all (>= 0) xs ==> all (`BitSet.member` bs) xs
+propIntersectionWithSelf :: [Word16] -> Bool
+propIntersectionWithSelf xs = all (`BitSet.member` bs) xs
   where
-    bs :: BitSet Int
+    bs :: BitSet Word16
     bs = let bs0 = BitSet.fromList xs in bs0 `BitSet.intersection` bs0
 
-propIntersection :: [Int] -> Property
-propIntersection xs = n >= 16 ==>
-                       all (`BitSet.member` bs) (l `intersect` r) &&
-                       all (`BitSet.notMember` bs) (dl `union` dr)
+propIntersection :: [Word16] -> Bool
+propIntersection xs =
+    all (`BitSet.member` bs) (l `intersect` r) &&
+    all (`BitSet.notMember` bs) (dl `union` dr)
   where
     n      = length xs
-    (l, r) = splitAt (n `div` 2) $ map abs xs
+    (l, r) = splitAt (n `div` 2) $ nub xs
 
     dl = l \\ r
     dr = r \\ l
 
-    bs :: BitSet Int
+    bs :: BitSet Word16
     bs = let bs1 = BitSet.fromList l
              bs2 = BitSet.fromList r
          in bs1 `BitSet.intersection` bs2
 
-propDifferenceWithSelf :: [Int] -> Property
-propDifferenceWithSelf xs = all (>= 0) xs ==> bs == BitSet.empty where
-  bs :: BitSet Int
+propDifferenceWithSelf :: [Word16] -> Bool
+propDifferenceWithSelf xs = bs == BitSet.empty where
+  bs :: BitSet Word16
   bs = let bs0 = BitSet.fromList xs in bs0 `BitSet.difference` bs0
 
-propDifference :: [Int] -> Property
+propDifference :: [Word16] -> Property
 propDifference xs = n >= 0 ==>
                     all (`BitSet.member` bs) (l \\ r) &&
                     all (`BitSet.notMember` bs) (l `intersect` r)
   where
     n      = length xs
-    (l, r) = splitAt (n `div` 2) . nub $ map abs xs
+    (l, r) = splitAt (n `div` 2) $ nub xs
 
-    bs :: BitSet Int
+    bs :: BitSet Word16
     bs = let bs1 = BitSet.fromList l
              bs2 = BitSet.fromList r
          in bs1 `BitSet.difference` bs2
