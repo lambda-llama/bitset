@@ -56,12 +56,18 @@ import Prelude hiding (null)
 import Data.Bits (Bits, (.|.), (.&.), complement,
                   testBit, setBit, clearBit, shiftR, popCount)
 import Data.Data (Data, Typeable)
+import Data.Monoid (Monoid(..))
 import Data.List (foldl')
 
 import Control.DeepSeq (NFData(..))
 
 data BitSet a = BitSet {-# UNPACK #-} !Int Integer
     deriving (Eq, Ord, Data, Typeable)
+
+instance Enum a => Monoid (BitSet a) where
+    mempty  = empty
+    mappend = union
+    mconcat = unions
 
 instance (Enum a, Show a) => Show (BitSet a) where
     show (BitSet _ i :: BitSet a) = "fromList " ++ show (f 0 i) where
@@ -76,17 +82,17 @@ instance NFData (BitSet a) where
 
 -- | Is the bit set empty?
 null :: BitSet a -> Bool
-null (BitSet n _) = n == 0
+null (BitSet _n i) = i == 0
 {-# INLINE null #-}
 
 -- | /O(1)/ The number of elements in the bit set.
 size :: BitSet a -> Int
-size (BitSet count _) = count
+size (BitSet n _i) = n
 {-# INLINE size #-}
 
 -- | /O(testBit on Integer)/ Ask whether the item is in the bit set.
 member :: Enum a => a -> BitSet a -> Bool
-member x (BitSet _ i) = testBit i (fromEnum x)
+member x (BitSet _n i) = testBit i (fromEnum x)
 {-# INLINE member #-}
 
 -- | /O(testBit on Integer)/ Ask whether the item is in the bit set.
@@ -106,22 +112,21 @@ singleton x = insert x empty
 
 -- | /O(setBit on Integer)/ Insert an item into the bit set.
 insert :: Enum a => a -> BitSet a -> BitSet a
-insert x (BitSet count i) = BitSet count' (setBit i e)
-    where count' = if testBit i e then count else count+1
-          e      = fromEnum x
+insert x (BitSet n i) = BitSet n' $ setBit i e where
+  n' = if testBit i e then n else n + 1
+  e  = fromEnum x
 {-# INLINE insert #-}
 
 -- | /O(clearBit on Integer)/ Delete an item from the bit set.
 delete :: Enum a => a -> BitSet a -> BitSet a
-delete x (BitSet count i) = BitSet count' (clearBit i e)
-    where count' = if testBit i e then count - 1 else count
-          e      = fromEnum x
+delete x (BitSet n i) = BitSet n' $ clearBit i e where
+  n' = if testBit i e then n - 1 else n
+  e  = fromEnum x
 {-# INLINE delete #-}
 
 -- | /O(.|. on Integer)/ The union of two sets.
 union :: Enum a => BitSet a -> BitSet a -> BitSet a
-union (BitSet _count1 i1) (BitSet _count2 i2) = BitSet (popCount i) i where
-  i :: Integer
+union (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
   i = i1 .|. i2
 {-# INLINE union #-}
 
@@ -132,32 +137,25 @@ unions = foldl' union empty
 
 -- | /O(xor on Integer)/ Difference of two sets.
 difference :: Enum a => BitSet a -> BitSet a -> BitSet a
-difference (BitSet _count1 i1) (BitSet _count2 i2) =
-    BitSet (popCount i) i
-  where
-    i :: Integer
-    i = i1 .&. complement i2
+difference (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
+  i = i1 .&. complement i2
 
 (\\) :: Enum a => BitSet a -> BitSet a -> BitSet a
 (\\) = difference
 
 -- | /O(.&. on Integer)/ The intersection of two sets.
 intersection :: Enum a => BitSet a -> BitSet a -> BitSet a
-intersection (BitSet _count1 i1) (BitSet _count2 i2) =
-    BitSet (popCount i) i
-  where
-    i :: Integer
-    i = i1 .&. i2
+intersection (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
+  i = i1 .&. i2
 
 -- | /O(n * setBit on Integer)/ Make a @BitSet@ from a list of items.
 fromList :: Enum a => [a] -> BitSet a
 fromList xs = BitSet (popCount i) i where
-  i :: Integer
   i = foldl' (\b x -> setBit b (fromEnum x)) 0 xs
 
--- | /O(1)/ Project a bit set to an integer.
+-- | /O(1)/ Project a bit set to an integral type.
 toIntegral :: Integral b => BitSet a -> b
-toIntegral (BitSet _ i) = fromIntegral i
+toIntegral (BitSet _n i) = fromIntegral i
 {-# INLINE toIntegral #-}
 
 -- | /O(n)/ Make a bit set of type @BitSet a@ from an integer. This is unsafe
