@@ -1,29 +1,30 @@
-Name:                bitset
-Version:             1.2
-Synopsis:            A functional data structure for efficient membership testing.
+Name:                 bitset
+Version:              1.2
+Synopsis:             A functional data structure for efficient membership testing.
 Description:
         A /bit set/ maintains a record of members from a type that can be mapped
         into (non-negative) @Int@s.  Supports insertion, deletion, size, and
         membership testing, and is completely pure (functional).
-Category:            Data Structures
-License:             BSD3
-License-file:        LICENSE
-Data-files:          CHANGES
-Author:              Denis Bueno <dbueno@gmail.com>
-Maintainer:          Sergei Lebedev <superbobry@gmail.com>
-Stability:           Alpha
-Cabal-Version:       >= 1.12
-Build-type:          Simple
-Tested-with:         GHC == 7.6.*
+Category:             Data Structures
+License:              BSD3
+License-file:         LICENSE
+Data-files:           CHANGES
+Author:               Denis Bueno <dbueno@gmail.com>
+Maintainer:           Sergei Lebedev <superbobry@gmail.com>
+Stability:            Alpha
+Cabal-Version:        >= 1.12
+Build-type:           Simple
+Tested-with:          GHC == 7.6.*
 
 Library
-    Hs-source-dirs:     src
-    Ghc-options:        -Wall
-    Default-language:   Haskell2010
+  Hs-source-dirs:     src
+  Ghc-options:        -Wall
+  Default-language:   Haskell2010
 
-    Build-depends:      base                    == 4.6.*
+  Build-depends:      base                    == 4.6.* || == 4.5.*
+                    , deepseq                 == 1.3.*
 
-    Exposed-modules:    Data.BitSet
+  Exposed-modules:    Data.BitSet
 
 
 Test-suite bitset-tests
@@ -34,12 +35,25 @@ Test-suite bitset-tests
   Type:               exitcode-stdio-1.0
   Main-is:            Tests.hs
 
-  Build-depends:      base                       == 4.6.*
-                    , QuickCheck                 == 2.4.*
+  Build-depends:      base                       == 4.6.* || == 4.5.*
+                    , QuickCheck                 == 2.5.*
                     , test-framework             == 0.6.*
                     , test-framework-quickcheck2 == 0.2.*
                     , bitset
 
+Benchmark bitset-benchmarks
+  Main-is: Benchmarks.hs
+  Hs-source-dirs:     tests, benchmarks
+  Default-language:   Haskell2010
+  Type:               exitcode-stdio-1.0
+
+  Build-depends:      base                        == 4.6.* || == 4.5.*
+                    , deepseq                     == 1.3.*
+                    , bitset
+
+                    , criterion                   == 0.6.*
+
+
 Source-repository head
-    Type:     git
-    Location: https://github.com/superbobry/bitset
+  Type:     git
+  Location: https://github.com/superbobry/bitset

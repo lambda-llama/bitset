@@ -34,9 +34,11 @@ module Data.BitSet
 
 import Prelude hiding (null)
 
-import Data.Bits (testBit, setBit, clearBit, shiftR, popCount)
+import Data.Bits (Bits, testBit, setBit, clearBit, shiftR, popCount)
 import Data.Data (Data, Typeable)
 import Data.List (foldl')
+
+import Control.DeepSeq (NFData(..))
 
 data BitSet a = BitSet {-# UNPACK #-} !Int Integer
     deriving (Eq, Ord, Data, Typeable)
@@ -44,9 +46,12 @@ data BitSet a = BitSet {-# UNPACK #-} !Int Integer
 instance (Enum a, Show a) => Show (BitSet a) where
     show (BitSet _ i :: BitSet a) = "fromList " ++ show (f 0 i) where
       f _n 0 = []
-      f n x  = if testBit x 0
+      f n x  = if x `testBit` 0
                then (toEnum n :: a) : f (n + 1) (shiftR x 1)
                else f (n + 1) (shiftR x 1)
+
+instance NFData (BitSet a) where
+    rnf (BitSet count i) = rnf count `seq` rnf i `seq` ()
 
 -- | The empty bit set.
 empty :: BitSet a
