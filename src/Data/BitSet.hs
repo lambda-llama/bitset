@@ -159,11 +159,11 @@ elems = toList
 
 -- | /O(n * shiftR on Integer)/. Convert a bit set to a list of elements.
 toList :: Enum a => BitSet a -> [a]
-toList (BitSet _i n0) = go 0 n0 [] where
-  go _i 0 acc = reverse acc
-  go i n acc  = if n `testBit` 0
-                then go (i + 1) (shiftR n 1) (toEnum i : acc)
-                else go (i + 1) (shiftR n 1) acc
+toList (BitSet _i n0) = go 0 n0 where
+  go _i 0 = []
+  go i n  = if n `testBit` 0
+            then toEnum i : go (i + 1) (shiftR n 1)
+            else go (i + 1) (shiftR n 1)
 
 -- | /O(n * setBit on Integer)/. Make a bit set from a list of elements.
 fromList :: Enum a => [a] -> BitSet a
