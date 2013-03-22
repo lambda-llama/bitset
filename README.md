@@ -17,9 +17,9 @@ import qualified Data.BitSet as BitSet
 data Color = Red | Green | Blue deriving (Show, Enum)
 
 main :: IO ()
-main = print $ bs \\ BitSet.fromList [Blue] where
+main = print $ bs \\ BitSet.singleton Blue where
   bs :: BitSet Color
-  bs = BitSet.formList [Red, Green, Blue]
+  bs = BitSet.fromList [Red, Green, Blue]
 ```
 
 [travis]: http://travis-ci.org/superbobry/bitset
