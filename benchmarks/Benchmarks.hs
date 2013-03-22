@@ -2,7 +2,6 @@
 
 module Main (main) where
 
-import Control.Monad (void)
 import Data.List (foldl')
 
 import Control.DeepSeq (NFData(..))
