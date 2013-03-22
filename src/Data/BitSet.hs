@@ -28,6 +28,8 @@ module Data.BitSet
     , size
     , member
     , notMember
+    , isSubsetOf
+    , isProperSubsetOf
 
     -- * Construction
     , empty
@@ -80,7 +82,7 @@ instance NFData (BitSet a) where
     rnf (BitSet count i) = rnf count `seq` rnf i `seq` ()
 
 
--- | Is the bit set empty?
+-- | /O(1)/ Is the bit set empty?
 null :: BitSet a -> Bool
 null (BitSet _n i) = i == 0
 {-# INLINE null #-}
@@ -99,6 +101,15 @@ member x (BitSet _n i) = testBit i (fromEnum x)
 notMember :: Enum a => a -> BitSet a -> Bool
 notMember bs = not . member bs
 {-# INLINE notMember #-}
+
+-- | /O(max(n, m))/. Is this a subset? (@s1 isSubsetOf s2@) tells whether
+-- @s1@ is a subset of @s2@.
+isSubsetOf :: Enum a => BitSet a -> BitSet a -> Bool
+isSubsetOf (BitSet n1 i1) (BitSet n2 i2) = n2 >= n1 && i2 .|. i1 == i2
+
+-- | /O(max(n, m)/. Is this a proper subset? (ie. a subset but not equal).
+isProperSubsetOf :: Enum a => BitSet a -> BitSet a -> Bool
+isProperSubsetOf bs1 bs2 = bs1 `isSubsetOf` bs2 && bs1 /= bs2
 
 -- | The empty bit set.
 empty :: BitSet a
@@ -124,18 +135,18 @@ delete x (BitSet n i) = BitSet n' $ clearBit i e where
   e  = fromEnum x
 {-# INLINE delete #-}
 
--- | /O(.|. on Integer)/ The union of two sets.
+-- | /O(max(m, n))/ The union of two bit sets.
 union :: Enum a => BitSet a -> BitSet a -> BitSet a
 union (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
   i = i1 .|. i2
 {-# INLINE union #-}
 
--- | /O(n * .|. on Integer)/ The union of a list of sets.
+-- | /O(max(m, n))/ The union of a list of bit sets.
 unions :: Enum a => [BitSet a] -> BitSet a
 unions = foldl' union empty
 {-# INLINE unions #-}
 
--- | /O(xor on Integer)/ Difference of two sets.
+-- | /O(max(m, n))/ Difference of two bit sets.
 difference :: Enum a => BitSet a -> BitSet a -> BitSet a
 difference (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
   i = i1 .&. complement i2
@@ -143,7 +154,7 @@ difference (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
 (\\) :: Enum a => BitSet a -> BitSet a -> BitSet a
 (\\) = difference
 
--- | /O(.&. on Integer)/ The intersection of two sets.
+-- | /O(max(m, n))/ The intersection of two bit sets.
 intersection :: Enum a => BitSet a -> BitSet a -> BitSet a
 intersection (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
   i = i1 .&. i2

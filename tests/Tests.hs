@@ -2,6 +2,7 @@ module Main (main) where
 
 import Control.Applicative ((<$>))
 import Data.List ((\\), intersect, union, nub)
+import Data.Monoid (mempty, mappend)
 import Data.Word (Word16)
 
 import Test.Framework (Test, defaultMain)
@@ -104,7 +105,7 @@ propDifferenceWithSelf xs = bs == BitSet.empty where
   bs = let bs0 = BitSet.fromList xs in bs0 `BitSet.difference` bs0
 
 propDifference :: [Word16] -> Property
-propDifference xs = n >= 0 ==>
+propDifference xs = n > 0 ==>
                     all (`BitSet.member` bs) (l \\ r) &&
                     all (`BitSet.notMember` bs) (l `intersect` r)
   where
@@ -115,6 +116,31 @@ propDifference xs = n >= 0 ==>
     bs = let bs1 = BitSet.fromList l
              bs2 = BitSet.fromList r
          in bs1 `BitSet.difference` bs2
+
+propMonoidLaws :: BitSet Word16 -> BitSet Word16 -> BitSet Word16 -> Bool
+propMonoidLaws bs1 bs2 bs3 =
+    bs1 `mappend` mempty == bs1 &&
+    mempty `mappend` bs1 == bs1 &&
+    mappend bs1 (bs2 `mappend` bs3) == (bs1 `mappend` bs2) `mappend` bs3
+
+propIsSubsetOfSelf :: BitSet Word16 -> Bool
+propIsSubsetOfSelf bs = bs `BitSet.isSubsetOf` bs &&
+                        not (bs `BitSet.isProperSubsetOf` bs)
+
+propIsSubsetOf :: [Word16] -> Bool
+propIsSubsetOf xs =
+    bs1 `BitSet.isSubsetOf` bs && bs2 `BitSet.isSubsetOf` bs
+  where
+    n = length xs
+
+    bs :: BitSet Word16
+    bs = BitSet.fromList xs
+
+    bs1 :: BitSet Word16
+    bs1 = BitSet.fromList $ take (n `div` 2) xs
+
+    bs2 :: BitSet Word16
+    bs2 = BitSet.fromList $ drop (n `div` 2) xs
 
 main :: IO ()
 main = defaultMain tests where
@@ -135,4 +161,7 @@ main = defaultMain tests where
           , testProperty "intersection" propIntersection
           , testProperty "difference with self" propDifferenceWithSelf
           , testProperty "difference" propDifference
+          , testProperty "monoid laws" propMonoidLaws
+          , testProperty "is subset of self" propIsSubsetOfSelf
+          , testProperty "is subset of" propIsSubsetOf
           ]
