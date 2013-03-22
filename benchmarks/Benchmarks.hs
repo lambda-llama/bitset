@@ -20,31 +20,44 @@ instance NFData B where
 
 main :: IO ()
 main = do
-    let bs = BitSet.fromList elems
-        s  = Set.fromList elems
-    return $ rnf [B bs, B s]
+    let bs1 = BitSet.fromList elems1
+        bs2 = BitSet.fromList elems2
+        s1  = Set.fromList elems1
+        s2  = Set.fromList elems2
+    return $ rnf [B bs1, B bs2, B s1, B s2]
     defaultMain
         [ bgroup "Set"
-          [ bench "fromList" (nf Set.fromList elems)
-          , bench "toList" (nf Set.toList s)
-          , bench "insert" (nf (insertS elems) Set.empty)
-          , bench "delete" (nf (deleteS elems) s)
-          , bench "member" (nf (memberS elems) s)
+          [ bench "fromList" (nf Set.fromList elems1)
+          , bench "toList" (nf Set.toList s1)
+          , bench "insert" (nf (insertS elems1) Set.empty)
+          , bench "delete" (nf (deleteS elems1) s1)
+          , bench "member" (nf (memberS elems1) s1)
+          , bench "isSubsetOf" (nf (Set.isSubsetOf s2) s1)
+          , bench "isProperSubsetOf" (nf (Set.isProperSubsetOf s2) s1)
+          , bench "intersection" (nf (Set.intersection s2) s1)
+          , bench "difference" (nf (Set.difference s2) s1)
+          , bench "union" (nf (Set.union s2) s1)
           ]
 
         , bgroup "BitSet"
-          [ bench "fromList" (nf BitSet.fromList elems)
-          , bench "toList" (nf BitSet.toList bs)
-          , bench "insert" (nf (insertBS elems) BitSet.empty)
-          , bench "delete" (nf (deleteBS elems) bs)
-          , bench "member" (nf (memberBS elems) bs)
+          [ bench "fromList" (nf BitSet.fromList elems1)
+          , bench "toList" (nf BitSet.toList bs1)
+          , bench "insert" (nf (insertBS elems1) BitSet.empty)
+          , bench "delete" (nf (deleteBS elems1) bs1)
+          , bench "member" (nf (memberBS elems1) bs1)
+          , bench "isSubsetOf" (nf (BitSet.isSubsetOf bs2) bs1)
+          , bench "isProperSubsetOf" (nf (BitSet.isProperSubsetOf bs2) bs1)
+          , bench "intersection" (nf (BitSet.intersection bs2) bs1)
+          , bench "difference" (nf (BitSet.difference bs2) bs1)
+          , bench "union" (nf (BitSet.union bs2) bs1)
           ]
         ]
   where
     n :: Int
     n = 128
 
-    elems = [1..n]
+    elems1 = [1..n]
+    elems2 = [1..n `div` 2]
 
 memberS :: [Int] -> Set Int -> Bool
 memberS xs s = all (\x -> Set.member x s) xs
