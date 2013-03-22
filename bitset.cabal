@@ -54,6 +54,7 @@ Benchmark bitset-benchmarks
                     , bitset
 
                     , criterion                   == 0.6.*
+                    , containers                  == 0.5.*
 
 
 Source-repository head
