@@ -17,7 +17,9 @@
 -- The interface we expose ensures client code will not typecheck if it
 -- confuses two bit sets intended to keep track of different types.
 module Data.BitSet
-    ( BitSet
+    (
+    -- * Bit set type
+      BitSet
 
     -- * Operators
     , (\\)
@@ -43,12 +45,10 @@ module Data.BitSet
     , intersection
 
     -- * Conversion
-
     -- ** List
     , elems
     , toList
     , fromList
-
     -- ** Arbitraty integral type
     , toIntegral
     , unsafeFromIntegral
@@ -59,8 +59,8 @@ import Prelude hiding (null)
 import Data.Bits (Bits, (.|.), (.&.), complement,
                   testBit, setBit, clearBit, shiftR, popCount)
 import Data.Data (Data, Typeable)
-import Data.Monoid (Monoid(..))
 import Data.List (foldl')
+import Data.Monoid (Monoid(..))
 
 import Control.DeepSeq (NFData(..))
 
@@ -168,7 +168,7 @@ toList (BitSet _i n0) = go 0 n0 [] where
                 then go (i + 1) (shiftR n 1) (toEnum i : acc)
                 else go (i + 1) (shiftR n 1) acc
 
--- | /O(n * setBit on Integer)/ Make a bitset from a list of elements.
+-- | /O(n * setBit on Integer)/ Make a bit set from a list of elements.
 fromList :: Enum a => [a] -> BitSet a
 fromList xs = BitSet (popCount i) i where
   i = foldl' (\b x -> setBit b (fromEnum x)) 0 xs
@@ -178,9 +178,9 @@ toIntegral :: Integral b => BitSet a -> b
 toIntegral (BitSet _n i) = fromIntegral i
 {-# INLINE toIntegral #-}
 
--- | /O(n)/ Make a bit set of type @BitSet a@ from an integer. This is unsafe
--- because it is not checked whether the bits set in the integer correspond to
--- values of type @a@. This is only useful as a more efficient alternative to
+-- | /O(n)/ Make a bit set from an integral. Unsafe because we don't
+-- checked whether the bits set in a given value correspond to values
+-- of type @a@. This is only useful as a more efficient alternative to
 -- fromList.
 unsafeFromIntegral :: Integral b => b -> BitSet a
 unsafeFromIntegral x = let i = fromIntegral x in BitSet (popCount i) i
