@@ -2,5 +2,5 @@
 before_install:
     - "sudo sh -c 'echo deb http://pl.archive.ubuntu.com/ubuntu/ quantal universe >> /etc/apt/sources.list'"
     - "sudo apt-get update"
-    - "sudo apt-get upgrade -t quantal ghc"
+    - "sudo apt-get install --only-upgrade -qq -t quantal ghc"
 language: haskell
