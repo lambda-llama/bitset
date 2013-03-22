@@ -2,6 +2,7 @@ module Main (main) where
 
 import Control.Applicative ((<$>))
 import Data.List ((\\), intersect, union, nub)
+import Data.Monoid (mempty, mappend)
 import Data.Word (Word16)
 
 import Test.Framework (Test, defaultMain)
@@ -116,6 +117,12 @@ propDifference xs = n >= 0 ==>
              bs2 = BitSet.fromList r
          in bs1 `BitSet.difference` bs2
 
+propMonoidLaws :: BitSet Word16 -> BitSet Word16 -> BitSet Word16 -> Bool
+propMonoidLaws bs1 bs2 bs3 =
+    bs1 `mappend` mempty == bs1 &&
+    mempty `mappend` bs1 == bs1 &&
+    mappend bs1 (bs2 `mappend` bs3) == (bs1 `mappend` bs2) `mappend` bs3
+
 main :: IO ()
 main = defaultMain tests where
   tests :: [Test]
@@ -135,4 +142,5 @@ main = defaultMain tests where
           , testProperty "intersection" propIntersection
           , testProperty "difference with self" propDifferenceWithSelf
           , testProperty "difference" propDifference
+          , testProperty "monoid laws" propMonoidLaws
           ]
