@@ -51,27 +51,27 @@ module Data.BitSet
     , unsafeFromIntegral
     ) where
 
-import Prelude hiding (null, foldr)
+import Prelude hiding (null)
 
 import Data.Bits (Bits, (.|.), (.&.), complement,
                   testBit, setBit, clearBit, shiftR, popCount)
 import Data.Data (Typeable)
-import Data.Foldable (Foldable(foldr), toList)
+import Data.Foldable (Foldable(foldMap), toList)
 import Data.List (foldl')
 import Data.Monoid (Monoid(..))
 
 import Control.DeepSeq (NFData(..))
 
 data BitSet a = Enum a => BitSet {-# UNPACK #-} !Int !Integer
-    deriving (Typeable)
+    deriving Typeable
 
 instance Eq (BitSet a) where
-    BitSet a1 a2 == BitSet b1 b2 = a1 == b1 && a2 == b2
+    BitSet n1 i1 == BitSet n2 i2 = n1 == n2 && i1 == i2
 
 instance Ord (BitSet a) where
-    BitSet a1 a2 `compare` BitSet b1 b2 = case a1 `compare` b1 of
-      EQ -> a2 `compare` b2
-      x -> x
+    BitSet n1 i1 `compare` BitSet n2 i2 = case n1 `compare` n2 of
+        EQ -> i1 `compare` i2
+        r  -> r
 
 instance Enum a => Monoid (BitSet a) where
     mempty  = empty
@@ -82,15 +82,15 @@ instance Show a => Show (BitSet a) where
     show bs = "fromList " ++ show (elems bs)
 
 instance NFData (BitSet a) where
-    rnf (BitSet count i) = rnf count `seq` rnf i `seq` ()
+    rnf (BitSet n i) = rnf n `seq` rnf i `seq` ()
 
 instance Foldable BitSet where
-    foldr f s (BitSet _i n0) = go 0 n0
-      where
-        go _i 0 = s
-        go i n  = if n `testBit` 0
-            then toEnum i `f` go (i + 1) (shiftR n 1)
-            else go (i + 1) (shiftR n 1)
+    foldMap f (BitSet _n i0) = go 0 i0 where
+        go _bit 0 = mempty
+        go bit i  =
+            if i `testBit` 0
+            then f (toEnum bit) `mappend` go (bit + 1) (shiftR i 1)
+            else go (bit + 1) (shiftR i 1)
 
 -- | /O(1)/. Is the bit set empty?
 null :: BitSet a -> Bool
@@ -152,8 +152,8 @@ union (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
 {-# INLINE union #-}
 
 -- | /O(max(m, n))/. The union of a list of bit sets.
-unions :: [BitSet a] -> BitSet a
-unions = foldl1 union
+unions :: Enum a => [BitSet a] -> BitSet a
+unions = foldl' union empty
 {-# INLINE unions #-}
 
 -- | /O(max(m, n))/. Difference of two bit sets.
