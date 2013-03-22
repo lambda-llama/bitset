@@ -1,20 +1,22 @@
 Name:                 bitset
 Version:              1.2
-Synopsis:             A functional data structure for efficient membership testing.
+Synopsis:             A compact functional set data structure.
 Description:
-        A /bit set/ maintains a record of members from a type that can be mapped
-        into (non-negative) @Int@s.  Supports insertion, deletion, size, and
-        membership testing, and is completely pure (functional).
+  A /bit set/ is a compact data structure, which maintains a set of members
+  from a type that can be enumerated (i. e. has an `Enum' instance). Current
+  implementations uses @Integer@ for as bit storage and provides most of the
+  expected set operations: insertion, deletion, intersection, membership
+  testing etc.
 Category:             Data Structures
-License:              BSD3
+License:              MIT
 License-file:         LICENSE
 Data-files:           CHANGES
-Author:               Denis Bueno <dbueno@gmail.com>
+Author:               Sergei Lebedev <superbobry@gmail.com>
 Maintainer:           Sergei Lebedev <superbobry@gmail.com>
 Stability:            Alpha
 Cabal-Version:        >= 1.12
 Build-type:           Simple
-Tested-with:          GHC == 7.6.*
+Tested-with:          GHC >= 7.4.2
 
 Library
   Hs-source-dirs:     src
