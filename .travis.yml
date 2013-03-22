@@ -1,6 +1,6 @@
 # Before install are required because there is a bug in base 4.5.0 (GHC 7.4.1) with popCount in Data.Bits
 before_install:
-    - "sudo echo 'deb http://pl.archive.ubuntu.com/ubuntu/ quantal universe' >> /etc/apt/sources.list"
+    - "sudo sh -c 'echo deb http://pl.archive.ubuntu.com/ubuntu/ quantal universe >> /etc/apt/sources.list'"
     - "sudo apt-get update"
     - "sudo apt-get upgrade -t quantal ghc"
 language: haskell
