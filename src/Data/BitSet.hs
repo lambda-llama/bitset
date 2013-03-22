@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE GADTs #-}
 
 -- | A /bit set/ maintains a record of members from a type that can be
 -- enumerated (i. e. has and `Enum' instance). The maximum number of elements
@@ -50,30 +51,46 @@ module Data.BitSet
     , unsafeFromIntegral
     ) where
 
-import Prelude hiding (null)
+import Prelude hiding (null, foldr)
 
 import Data.Bits (Bits, (.|.), (.&.), complement,
                   testBit, setBit, clearBit, shiftR, popCount)
-import Data.Data (Data, Typeable)
+import Data.Data (Typeable)
+import Data.Foldable (Foldable(foldr), toList)
 import Data.List (foldl')
 import Data.Monoid (Monoid(..))
 
 import Control.DeepSeq (NFData(..))
 
-data BitSet a = BitSet {-# UNPACK #-} !Int !Integer
-    deriving (Eq, Ord, Data, Typeable)
+data BitSet a = Enum a => BitSet {-# UNPACK #-} !Int !Integer
+    deriving (Typeable)
+
+instance Eq (BitSet a) where
+    BitSet a1 a2 == BitSet b1 b2 = a1 == b1 && a2 == b2
+
+instance Ord (BitSet a) where
+    BitSet a1 a2 `compare` BitSet b1 b2 = case a1 `compare` b1 of
+      EQ -> a2 `compare` b2
+      x -> x
 
 instance Enum a => Monoid (BitSet a) where
     mempty  = empty
     mappend = union
     mconcat = unions
 
-instance (Enum a, Show a) => Show (BitSet a) where
+instance Show a => Show (BitSet a) where
     show bs = "fromList " ++ show (elems bs)
 
 instance NFData (BitSet a) where
     rnf (BitSet count i) = rnf count `seq` rnf i `seq` ()
 
+instance Foldable BitSet where
+    foldr f s (BitSet _i n0) = go 0 n0
+      where
+        go _i 0 = s
+        go i n  = if n `testBit` 0
+            then toEnum i `f` go (i + 1) (shiftR n 1)
+            else go (i + 1) (shiftR n 1)
 
 -- | /O(1)/. Is the bit set empty?
 null :: BitSet a -> Bool
@@ -86,26 +103,26 @@ size (BitSet n _i) = n
 {-# INLINE size #-}
 
 -- | /O(testBit on Integer)/. Ask whether the item is in the bit set.
-member :: Enum a => a -> BitSet a -> Bool
+member :: a -> BitSet a -> Bool
 member x (BitSet _n i) = testBit i (fromEnum x)
 {-# INLINE member #-}
 
 -- | /O(testBit on Integer)/. Ask whether the item is in the bit set.
-notMember :: Enum a => a -> BitSet a -> Bool
+notMember :: a -> BitSet a -> Bool
 notMember bs = not . member bs
 {-# INLINE notMember #-}
 
 -- | /O(max(n, m))/.. Is this a subset? (@s1 isSubsetOf s2@) tells whether
 -- @s1@ is a subset of @s2@.
-isSubsetOf :: Enum a => BitSet a -> BitSet a -> Bool
+isSubsetOf :: BitSet a -> BitSet a -> Bool
 isSubsetOf (BitSet n1 i1) (BitSet n2 i2) = n2 >= n1 && i2 .|. i1 == i2
 
 -- | /O(max(n, m)/.. Is this a proper subset? (ie. a subset but not equal).
-isProperSubsetOf :: Enum a => BitSet a -> BitSet a -> Bool
+isProperSubsetOf :: BitSet a -> BitSet a -> Bool
 isProperSubsetOf bs1 bs2 = bs1 `isSubsetOf` bs2 && bs1 /= bs2
 
 -- | The empty bit set.
-empty :: BitSet a
+empty :: Enum a => BitSet a
 empty = BitSet 0 0
 {-# INLINE empty #-}
 
@@ -115,55 +132,47 @@ singleton x = insert x empty
 {-# INLINE singleton #-}
 
 -- | /O(setBit on Integer)/. Insert an item into the bit set.
-insert :: Enum a => a -> BitSet a -> BitSet a
+insert :: a -> BitSet a -> BitSet a
 insert x (BitSet n i) = BitSet n' $ setBit i e where
   n' = if testBit i e then n else n + 1
   e  = fromEnum x
 {-# INLINE insert #-}
 
 -- | /O(clearBit on Integer)/. Delete an item from the bit set.
-delete :: Enum a => a -> BitSet a -> BitSet a
+delete :: a -> BitSet a -> BitSet a
 delete x (BitSet n i) = BitSet n' $ clearBit i e where
   n' = if testBit i e then n - 1 else n
   e  = fromEnum x
 {-# INLINE delete #-}
 
 -- | /O(max(m, n))/. The union of two bit sets.
-union :: Enum a => BitSet a -> BitSet a -> BitSet a
+union :: BitSet a -> BitSet a -> BitSet a
 union (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
   i = i1 .|. i2
 {-# INLINE union #-}
 
 -- | /O(max(m, n))/. The union of a list of bit sets.
-unions :: Enum a => [BitSet a] -> BitSet a
-unions = foldl' union empty
+unions :: [BitSet a] -> BitSet a
+unions = foldl1 union
 {-# INLINE unions #-}
 
 -- | /O(max(m, n))/. Difference of two bit sets.
-difference :: Enum a => BitSet a -> BitSet a -> BitSet a
+difference :: BitSet a -> BitSet a -> BitSet a
 difference (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
   i = i1 .&. complement i2
 
 -- | /O(max(m, n))/. See `difference'.
-(\\) :: Enum a => BitSet a -> BitSet a -> BitSet a
+(\\) :: BitSet a -> BitSet a -> BitSet a
 (\\) = difference
 
 -- | /O(max(m, n))/. The intersection of two bit sets.
-intersection :: Enum a => BitSet a -> BitSet a -> BitSet a
+intersection :: BitSet a -> BitSet a -> BitSet a
 intersection (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
   i = i1 .&. i2
 
 -- | /O(n * shiftR on Integer)/. An alias to @toList@.
-elems :: Enum a => BitSet a -> [a]
+elems :: BitSet a -> [a]
 elems = toList
-
--- | /O(n * shiftR on Integer)/. Convert a bit set to a list of elements.
-toList :: Enum a => BitSet a -> [a]
-toList (BitSet _i n0) = go 0 n0 [] where
-  go _i 0 acc = reverse acc
-  go i n acc  = if n `testBit` 0
-                then go (i + 1) (shiftR n 1) (toEnum i : acc)
-                else go (i + 1) (shiftR n 1) acc
 
 -- | /O(n * setBit on Integer)/. Make a bit set from a list of elements.
 fromList :: Enum a => [a] -> BitSet a
@@ -179,6 +188,6 @@ toIntegral (BitSet _n i) = fromIntegral i
 -- checked whether the bits set in a given value correspond to values
 -- of type @a@. This is only useful as a more efficient alternative to
 -- fromList.
-unsafeFromIntegral :: Integral b => b -> BitSet a
+unsafeFromIntegral :: (Enum a, Integral b) => b -> BitSet a
 unsafeFromIntegral x = let i = fromIntegral x in BitSet (popCount i) i
 {-# INLINE unsafeFromIntegral #-}
