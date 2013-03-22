@@ -1,7 +1,7 @@
 module Main (main) where
 
 import Control.Applicative ((<$>))
-import Data.List ((\\), intersect, union, nub)
+import Data.List ((\\), intersect, union, nub, sort)
 import Data.Monoid (mempty, mappend)
 import Data.Word (Word16)
 
@@ -53,6 +53,11 @@ propDeleteIdempotent x bs =
 propInsertIdempotent :: Word16 -> BitSet Word16 -> Bool
 propInsertIdempotent x bs =
     BitSet.insert x bs == BitSet.insert x (BitSet.insert x bs)
+
+propToList :: [Word16] -> Bool
+propToList xs = nub (sort xs) == BitSet.toList bs where
+  bs :: BitSet Word16
+  bs = BitSet.fromList xs
 
 propFromList :: [Word16] -> Bool
 propFromList xs = all (`BitSet.member` bs) xs where
@@ -153,6 +158,7 @@ main = defaultMain tests where
           , testProperty "insert and delete are idempotent" propInsertDeleteIdempotent
           , testProperty "delete is idempotent" propDeleteIdempotent
           , testProperty "insert is idempotent" propInsertIdempotent
+          , testProperty "toList" propToList
           , testProperty "fromList" propFromList
           , testProperty "empty" propEmpty
           , testProperty "unsafe construction from integral" propUnsafeFromIntegral

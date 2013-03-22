@@ -1,4 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
 -- | A /bit set/ maintains a record of members from a type that can be mapped
@@ -46,6 +45,8 @@ module Data.BitSet
     -- * Conversion
 
     -- ** List
+    , elems
+    , toList
     , fromList
 
     -- ** Arbitraty integral type
@@ -72,11 +73,7 @@ instance Enum a => Monoid (BitSet a) where
     mconcat = unions
 
 instance (Enum a, Show a) => Show (BitSet a) where
-    show (BitSet _ i :: BitSet a) = "fromList " ++ show (f 0 i) where
-      f _n 0 = []
-      f n x  = if x `testBit` 0
-               then (toEnum n :: a) : f (n + 1) (shiftR x 1)
-               else f (n + 1) (shiftR x 1)
+    show bs = "fromList " ++ show (elems bs)
 
 instance NFData (BitSet a) where
     rnf (BitSet count i) = rnf count `seq` rnf i `seq` ()
@@ -159,7 +156,19 @@ intersection :: Enum a => BitSet a -> BitSet a -> BitSet a
 intersection (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
   i = i1 .&. i2
 
--- | /O(n * setBit on Integer)/ Make a @BitSet@ from a list of items.
+-- | /O(n * shiftR on Integer)/ An alias to @toList@.
+elems :: Enum a => BitSet a -> [a]
+elems = toList
+
+-- | /O(n * shiftR on Integer)/ Convert a bit set to a list of elements.
+toList :: Enum a => BitSet a -> [a]
+toList (BitSet _i n0) = go 0 n0 [] where
+  go _i 0 acc = reverse acc
+  go i n acc  = if n `testBit` 0
+                then go (i + 1) (shiftR n 1) (toEnum i : acc)
+                else go (i + 1) (shiftR n 1) acc
+
+-- | /O(n * setBit on Integer)/ Make a bitset from a list of elements.
 fromList :: Enum a => [a] -> BitSet a
 fromList xs = BitSet (popCount i) i where
   i = foldl' (\b x -> setBit b (fromEnum x)) 0 xs
