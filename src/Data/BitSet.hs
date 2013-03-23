@@ -60,7 +60,7 @@ module Data.BitSet
 
 import Prelude hiding (null)
 
-import Data.Bits (Bits, (.|.), (.&.), complement,
+import Data.Bits (Bits, (.|.), (.&.), complement, bit,
                   testBit, setBit, clearBit, shiftR, popCount)
 import Data.Data (Typeable)
 import Data.Foldable (Foldable(foldMap), toList)
@@ -93,11 +93,11 @@ instance NFData (BitSet a) where
 
 instance Foldable BitSet where
     foldMap f (BitSet _n i0) = go 0 i0 where
-        go _bit 0 = mempty
-        go bit i  =
+        go _b 0 = mempty
+        go b i  =
             if i `testBit` 0
-            then f (toEnum bit) `mappend` go (bit + 1) (shiftR i 1)
-            else go (bit + 1) (shiftR i 1)
+            then f (toEnum b) `mappend` go (b + 1) (shiftR i 1)
+            else go (b + 1) (shiftR i 1)
 
 -- | /O(1)/. Is the bit set empty?
 null :: BitSet a -> Bool
@@ -135,7 +135,7 @@ empty = BitSet 0 0
 
 -- | O(setBit on Integer). Create a singleton set.
 singleton :: Enum a => a -> BitSet a
-singleton x = BitSet 1 $! fromIntegral (fromEnum x)
+singleton x = BitSet 1 $! bit (fromEnum x)
 {-# INLINE singleton #-}
 
 -- | /O(setBit on Integer)/. Insert an item into the bit set.
