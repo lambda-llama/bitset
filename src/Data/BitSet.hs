@@ -155,23 +155,13 @@ singleton x = BitSet { _n = 1, _bits = bit $! fromEnum x }
 -- | /O(setBit on Integer)/. Insert an item into the bit set.
 insert :: a -> BitSet c a -> BitSet c a
 insert x bs@(BitSet { _n, _bits }) =
-    if testBit _bits i
-    then bs
-    else bs { _n = _n + 1, _bits = setBit _bits i }
-  where
-    i :: Int
-    i = fromEnum x
+    bs { _n = _n + 1, _bits = setBit _bits $ fromEnum x }
 {-# INLINE insert #-}
 
 -- | /O(clearBit on Integer)/. Delete an item from the bit set.
 delete :: a -> BitSet c a -> BitSet c a
 delete x bs@(BitSet { _n, _bits }) =
-    if testBit _bits i
-    then bs { _n = _n - 1, _bits = clearBit _bits i }
-    else bs
-  where
-    i :: Int
-    i  = fromEnum x
+    bs { _n = _n - 1 , _bits = clearBit _bits $ fromEnum x }
 {-# INLINE delete #-}
 
 -- | /O(max(m, n))/. The union of two bit sets.
