@@ -29,6 +29,7 @@ main = do
         [ bgroup "Set"
           [ bench "fromList" (nf Set.fromList elems1)
           , bench "toList" (nf Set.toList s1)
+          , bench "singleton" (nf Set.singleton n)
           , bench "insert" (nf (insertS elems1) Set.empty)
           , bench "delete" (nf (deleteS elems1) s1)
           , bench "member" (nf (memberS elems1) s1)
@@ -42,6 +43,7 @@ main = do
         , bgroup "BitSet"
           [ bench "fromList" (nf BitSet.fromList elems1)
           , bench "toList" (nf BitSet.toList bs1)
+          , bench "singleton" (nf BitSet.singleton n)
           , bench "insert" (nf (insertBS elems1) BitSet.empty)
           , bench "delete" (nf (deleteBS elems1) bs1)
           , bench "member" (nf (memberBS elems1) bs1)

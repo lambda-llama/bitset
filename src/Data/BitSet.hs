@@ -1,7 +1,17 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE GADTs #-}
 
--- | A /bit set/ maintains a record of members from a type that can be
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.BitSet
+-- Copyright   :  (c) Sergei Lebedev 2013.
+--                Based on Data.BitSet (c) Denis Bueno 2008-2009
+-- License     :  MIT
+-- Maintainer  :  superbobry@gmail.com
+-- Stability   :  experimental
+-- Portability :  non-portable
+
+-- A /bit set/ maintains a record of members from a type that can be
 -- enumerated (i. e. has and `Enum' instance). The maximum number of elements
 -- that can be stored is @maxBound :: Int@.
 --
@@ -10,9 +20,6 @@
 -- in a bit set start from 0 and go up. A value for which @fromEnum x@ is @n@
 -- corresponds to bit location @n@ in an @Integer@, and thus requires that
 -- @Integer@ to have at least @n@ bits.
---
--- /Note/: The idea of using `Integer' as bit storage for a bit set was
--- borrowed from an unsupported `Data.BitSet' implementation by Denis Bueno.
 module Data.BitSet
     (
     -- * Bit set type
@@ -112,12 +119,12 @@ notMember :: a -> BitSet a -> Bool
 notMember bs = not . member bs
 {-# INLINE notMember #-}
 
--- | /O(max(n, m))/.. Is this a subset? (@s1 isSubsetOf s2@) tells whether
+-- | /O(max(n, m))/. Is this a subset? (@s1 isSubsetOf s2@) tells whether
 -- @s1@ is a subset of @s2@.
 isSubsetOf :: BitSet a -> BitSet a -> Bool
 isSubsetOf (BitSet n1 i1) (BitSet n2 i2) = n2 >= n1 && i2 .|. i1 == i2
 
--- | /O(max(n, m)/.. Is this a proper subset? (ie. a subset but not equal).
+-- | /O(max(n, m)/. Is this a proper subset? (ie. a subset but not equal).
 isProperSubsetOf :: BitSet a -> BitSet a -> Bool
 isProperSubsetOf bs1 bs2 = bs1 `isSubsetOf` bs2 && bs1 /= bs2
 
@@ -128,7 +135,7 @@ empty = BitSet 0 0
 
 -- | O(setBit on Integer). Create a singleton set.
 singleton :: Enum a => a -> BitSet a
-singleton x = insert x empty
+singleton x = BitSet 1 $! fromIntegral (fromEnum x)
 {-# INLINE singleton #-}
 
 -- | /O(setBit on Integer)/. Insert an item into the bit set.
