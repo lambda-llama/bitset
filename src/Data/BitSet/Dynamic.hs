@@ -49,12 +49,12 @@ size :: BitSet a -> Int
 size = BS.size
 {-# INLINE size #-}
 
--- | /O(testBit on Integer)/. Ask whether the item is in the bit set.
+-- | /O(1)/. Ask whether the item is in the bit set.
 member :: a -> BitSet a -> Bool
 member = BS.member
 {-# INLINE member #-}
 
--- | /O(testBit on Integer)/. Ask whether the item is in the bit set.
+-- | /O(1)/. Ask whether the item is in the bit set.
 notMember :: a -> BitSet a -> Bool
 notMember = BS.notMember
 {-# INLINE notMember #-}
@@ -73,17 +73,17 @@ empty :: Enum a => BitSet a
 empty = BS.empty
 {-# INLINE empty #-}
 
--- | O(setBit on Integer). Create a singleton set.
+-- | O(1). Create a singleton set.
 singleton :: Enum a => a -> BitSet a
 singleton = BS.singleton
 {-# INLINE singleton #-}
 
--- | /O(setBit on Integer)/. Insert an item into the bit set.
+-- | /O(1)/. Insert an item into the bit set.
 insert :: a -> BitSet a -> BitSet a
 insert = BS.insert
 {-# INLINE insert #-}
 
--- | /O(clearBit on Integer)/. Delete an item from the bit set.
+-- | /O(1)/. Delete an item from the bit set.
 delete :: a -> BitSet a -> BitSet a
 delete = BS.delete
 {-# INLINE delete #-}
@@ -121,7 +121,7 @@ elems :: BitSet a -> [a]
 elems = BS.toList
 {-# INLINE elems #-}
 
--- | /O(n * setBit on Integer)/. Make a bit set from a list of elements.
+-- | /O(n)/. Make a bit set from a list of elements.
 fromList :: Enum a => [a] -> BitSet a
 fromList = BS.fromList
 {-# INLINE fromList #-}

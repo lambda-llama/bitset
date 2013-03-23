@@ -122,12 +122,12 @@ size :: BitSet c a -> Int
 size = _n
 {-# INLINE size #-}
 
--- | /O(testBit on Integer)/. Ask whether the item is in the bit set.
+-- | /O(1)/. Ask whether the item is in the bit set.
 member :: a -> BitSet c a -> Bool
 member x (BitSet { _bits }) = testBit _bits (fromEnum x)
 {-# INLINE member #-}
 
--- | /O(testBit on Integer)/. Ask whether the item is in the bit set.
+-- | /O(1)/. Ask whether the item is in the bit set.
 notMember :: a -> BitSet c a -> Bool
 notMember bs = not . member bs
 {-# INLINE notMember #-}
@@ -152,7 +152,7 @@ singleton :: (Enum a, Bits c, Num c) => a -> BitSet c a
 singleton x = BitSet { _n = 1, _bits = bit $! fromEnum x }
 {-# INLINE singleton #-}
 
--- | /O(setBit on Integer)/. Insert an item into the bit set.
+-- | /O(d)/. Insert an item into the bit set.
 insert :: a -> BitSet c a -> BitSet c a
 insert x bs@(BitSet { _n, _bits }) =
     if testBit _bits i
@@ -163,7 +163,7 @@ insert x bs@(BitSet { _n, _bits }) =
     i = fromEnum x
 {-# INLINE insert #-}
 
--- | /O(clearBit on Integer)/. Delete an item from the bit set.
+-- | /O(d)/. Delete an item from the bit set.
 delete :: a -> BitSet c a -> BitSet c a
 delete x bs@(BitSet { _n, _bits }) =
     if testBit _bits i
@@ -207,16 +207,16 @@ intersection (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
     b = b1 .&. b2
 {-# INLINE intersection #-}
 
--- | /O(n)/. Convert the bit set set to a list of elements.
+-- | /O(d * n)/. Convert the bit set set to a list of elements.
 toList :: Num c => BitSet c a -> [a]
 toList = Foldable.toList
 
--- | /O(n)/. An alias to 'toList'.
+-- | /O(d * n)/. An alias to 'toList'.
 elems :: Num c => BitSet c a -> [a]
 elems = toList
 {-# INLINE elems #-}
 
--- | /O(n * setBit on Integer)/. Make a bit set from a list of elements.
+-- | /O(d * n)/. Make a bit set from a list of elements.
 fromList :: (Enum a, Bits c, Num c) => [a] -> BitSet c a
 fromList xs = BitSet { _n = popCount b, _bits = b } where
   b = foldl' (\i x -> setBit i (fromEnum x)) 0 xs
