@@ -1,4 +1,4 @@
-{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE GADTs #-}
@@ -74,7 +74,7 @@ import qualified Data.Foldable as Foldable
 import Control.DeepSeq (NFData(..))
 
 data BitSet c a = (Enum a, Bits c, Num c) =>
-                  BitSet { _n    :: {-# UNPACK #-} !Int
+                  BitSet { _n    :: Int
                          , _bits :: !c
                          }
     deriving Typeable
@@ -106,7 +106,7 @@ instance NFData c => NFData (BitSet c a) where
     rnf (BitSet { _n, _bits }) = rnf _n `seq` rnf _bits `seq` ()
 
 instance Num c => Foldable.Foldable (BitSet c) where
-    foldMap f (BitSet { _n, _bits }) = go _n 0 where
+    foldMap f (BitSet { _n = !_n, _bits }) = go _n 0 where
         go 0 _b = mempty
         go n b  = if _bits `testBit` b
                   then f (toEnum b) <> go (pred n) (succ b)
@@ -155,9 +155,9 @@ singleton x = BitSet { _n = 1, _bits = bit $! fromEnum x }
 -- | /O(d)/. Insert an item into the bit set.
 insert :: a -> BitSet c a -> BitSet c a
 insert x bs@(BitSet { _n, _bits }) =
-    if testBit _bits i
-    then bs
-    else bs { _n = _n + 1, _bits = setBit _bits i }
+    bs { _n    = if _bits `testBit` i then _n else _n + 1
+       , _bits = setBit _bits i
+       }
   where
     i :: Int
     i = fromEnum x
@@ -166,9 +166,9 @@ insert x bs@(BitSet { _n, _bits }) =
 -- | /O(d)/. Delete an item from the bit set.
 delete :: a -> BitSet c a -> BitSet c a
 delete x bs@(BitSet { _n, _bits }) =
-    if testBit _bits i
-    then bs { _n = _n - 1, _bits = clearBit _bits i }
-    else bs
+    bs { _n    = if _bits `testBit` i then _n - 1 else _n
+       , _bits = clearBit _bits i
+       }
   where
     i :: Int
     i  = fromEnum x
