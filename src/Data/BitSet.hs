@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE GADTs #-}
 
 -----------------------------------------------------------------------------
@@ -20,6 +21,9 @@
 -- in a bit set start from 0 and go up. A value for which @fromEnum x@ is @n@
 -- corresponds to bit location @n@ in an @Integer@, and thus requires that
 -- @Integer@ to have at least @n@ bits.
+--
+-----------------------------------------------------------------------------
+
 module Data.BitSet
     (
     -- * Bit set type
@@ -53,46 +57,55 @@ module Data.BitSet
     , elems
     , toList
     , fromList
-    -- ** Arbitraty integral type
-    , toIntegral
-    , unsafeFromIntegral
     ) where
 
 import Prelude hiding (null)
 
+import Control.Applicative ((<$>))
 import Data.Bits (Bits, (.|.), (.&.), complement, bit,
                   testBit, setBit, clearBit, shiftR, popCount)
 import Data.Data (Typeable)
 import Data.Foldable (Foldable(foldMap), toList)
 import Data.List (foldl')
 import Data.Monoid (Monoid(..))
+import Text.Read (Read(..), Lexeme(..), lexP, prec, parens)
 
 import Control.DeepSeq (NFData(..))
 
-data BitSet a = Enum a => BitSet {-# UNPACK #-} !Int !Integer
+data BitSet a = Enum a => BitSet { _n    :: {-# UNPACK #-} !Int
+                                 , _bits :: !Integer
+                                 }
     deriving Typeable
 
 instance Eq (BitSet a) where
-    BitSet n1 i1 == BitSet n2 i2 = n1 == n2 && i1 == i2
+    BitSet { _n = n1, _bits = b1 } == BitSet { _n = n2 , _bits = b2 } =
+        n1 == n2 && b1 == b2
 
 instance Ord (BitSet a) where
-    BitSet n1 i1 `compare` BitSet n2 i2 = case n1 `compare` n2 of
-        EQ -> i1 `compare` i2
+    bs1 `compare` bs2 = case _n bs1 `compare` _n bs2 of
+        EQ -> _bits bs1 `compare` _bits bs2
         r  -> r
+
+
+instance (Enum a, Read a) => Read (BitSet a) where
+    readPrec = parens . prec 10 $ do
+        Ident "fromList" <- lexP
+        fromList <$> readPrec
+
+instance Show a => Show (BitSet a) where
+    showsPrec p bs = showParen (p > 10) $
+                     showString "fromList " . shows (toList bs)
 
 instance Enum a => Monoid (BitSet a) where
     mempty  = empty
     mappend = union
     mconcat = unions
 
-instance Show a => Show (BitSet a) where
-    show bs = "fromList " ++ show (elems bs)
-
 instance NFData (BitSet a) where
-    rnf (BitSet n i) = rnf n `seq` rnf i `seq` ()
+    rnf (BitSet { _n, _bits }) = rnf _n `seq` rnf _bits `seq` ()
 
 instance Foldable BitSet where
-    foldMap f (BitSet _n i0) = go 0 i0 where
+    foldMap f (BitSet { _bits }) = go 0 _bits where
         go _b 0 = mempty
         go b i  =
             if i `testBit` 0
@@ -101,17 +114,17 @@ instance Foldable BitSet where
 
 -- | /O(1)/. Is the bit set empty?
 null :: BitSet a -> Bool
-null (BitSet _n i) = i == 0
+null (BitSet { _bits }) = _bits == 0
 {-# INLINE null #-}
 
 -- | /O(1)/. The number of elements in the bit set.
 size :: BitSet a -> Int
-size (BitSet n _i) = n
+size = _n
 {-# INLINE size #-}
 
 -- | /O(testBit on Integer)/. Ask whether the item is in the bit set.
 member :: a -> BitSet a -> Bool
-member x (BitSet _n i) = testBit i (fromEnum x)
+member x (BitSet { _bits }) = testBit _bits (fromEnum x)
 {-# INLINE member #-}
 
 -- | /O(testBit on Integer)/. Ask whether the item is in the bit set.
@@ -122,7 +135,8 @@ notMember bs = not . member bs
 -- | /O(max(n, m))/. Is this a subset? (@s1 isSubsetOf s2@) tells whether
 -- @s1@ is a subset of @s2@.
 isSubsetOf :: BitSet a -> BitSet a -> Bool
-isSubsetOf (BitSet n1 i1) (BitSet n2 i2) = n2 >= n1 && i2 .|. i1 == i2
+isSubsetOf (BitSet { _n = n1, _bits = b1 }) (BitSet { _n = n2, _bits = b2 }) =
+    n2 >= n1 && b2 .|. b1 == b2
 
 -- | /O(max(n, m)/. Is this a proper subset? (ie. a subset but not equal).
 isProperSubsetOf :: BitSet a -> BitSet a -> Bool
@@ -130,32 +144,43 @@ isProperSubsetOf bs1 bs2 = bs1 `isSubsetOf` bs2 && bs1 /= bs2
 
 -- | The empty bit set.
 empty :: Enum a => BitSet a
-empty = BitSet 0 0
+empty = BitSet { _n = 0, _bits = 0 }
 {-# INLINE empty #-}
 
 -- | O(setBit on Integer). Create a singleton set.
 singleton :: Enum a => a -> BitSet a
-singleton x = BitSet 1 $! bit (fromEnum x)
+singleton x = BitSet { _n = 1, _bits = bit $! fromEnum x }
 {-# INLINE singleton #-}
 
 -- | /O(setBit on Integer)/. Insert an item into the bit set.
 insert :: a -> BitSet a -> BitSet a
-insert x (BitSet n i) = BitSet n' $ setBit i e where
-  n' = if testBit i e then n else n + 1
-  e  = fromEnum x
+insert x bs@(BitSet { _n, _bits }) =
+    if testBit _bits i
+    then bs
+    else bs { _n = _n + 1, _bits = setBit _bits i }
+  where
+    i :: Int
+    i = fromEnum x
 {-# INLINE insert #-}
 
 -- | /O(clearBit on Integer)/. Delete an item from the bit set.
 delete :: a -> BitSet a -> BitSet a
-delete x (BitSet n i) = BitSet n' $ clearBit i e where
-  n' = if testBit i e then n - 1 else n
-  e  = fromEnum x
+delete x bs@(BitSet { _n, _bits }) =
+    if testBit _bits i
+    then bs { _n = _n - 1, _bits = clearBit _bits i }
+    else bs
+  where
+    i :: Int
+    i  = fromEnum x
 {-# INLINE delete #-}
 
 -- | /O(max(m, n))/. The union of two bit sets.
 union :: BitSet a -> BitSet a -> BitSet a
-union (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
-  i = i1 .|. i2
+union (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
+    BitSet { _n = popCount b, _bits = b }
+  where
+    b :: Integer
+    b = b1 .|. b2
 {-# INLINE union #-}
 
 -- | /O(max(m, n))/. The union of a list of bit sets.
@@ -165,8 +190,11 @@ unions = foldl' union empty
 
 -- | /O(max(m, n))/. Difference of two bit sets.
 difference :: BitSet a -> BitSet a -> BitSet a
-difference (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
-  i = i1 .&. complement i2
+difference (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
+    BitSet { _n = popCount b, _bits = b }
+  where
+    b :: Integer
+    b = b1 .&. complement b2
 
 -- | /O(max(m, n))/. See `difference'.
 (\\) :: BitSet a -> BitSet a -> BitSet a
@@ -174,8 +202,11 @@ difference (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
 
 -- | /O(max(m, n))/. The intersection of two bit sets.
 intersection :: BitSet a -> BitSet a -> BitSet a
-intersection (BitSet _n1 i1) (BitSet _n2 i2) = BitSet (popCount i) i where
-  i = i1 .&. i2
+intersection (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
+    BitSet { _n = popCount b, _bits = b }
+  where
+    b :: Integer
+    b = b1 .&. b2
 
 -- | /O(n * shiftR on Integer)/. An alias to @toList@.
 elems :: BitSet a -> [a]
@@ -183,18 +214,5 @@ elems = toList
 
 -- | /O(n * setBit on Integer)/. Make a bit set from a list of elements.
 fromList :: Enum a => [a] -> BitSet a
-fromList xs = BitSet (popCount i) i where
-  i = foldl' (\b x -> setBit b (fromEnum x)) 0 xs
-
--- | /O(1)/. Project a bit set to an integral type.
-toIntegral :: Integral b => BitSet a -> b
-toIntegral (BitSet _n i) = fromIntegral i
-{-# INLINE toIntegral #-}
-
--- | /O(n)/. Make a bit set from an integral. Unsafe because we don't
--- checked whether the bits set in a given value correspond to values
--- of type @a@. This is only useful as a more efficient alternative to
--- fromList.
-unsafeFromIntegral :: (Enum a, Integral b) => b -> BitSet a
-unsafeFromIntegral x = let i = fromIntegral x in BitSet (popCount i) i
-{-# INLINE unsafeFromIntegral #-}
+fromList xs = BitSet { _n = popCount b, _bits = b } where
+  b = foldl' (\i x -> setBit i (fromEnum x)) 0 xs

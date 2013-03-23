@@ -67,13 +67,6 @@ propFromList xs = all (`BitSet.member` bs) xs where
 propEmpty :: Word16 -> Bool
 propEmpty x = x `BitSet.notMember` BitSet.empty
 
-propUnsafeFromIntegral :: Word16 -> Bool
-propUnsafeFromIntegral x =
-    bs == BitSet.unsafeFromIntegral (BitSet.toIntegral bs :: Integer)
-  where
-    bs :: BitSet Word16
-    bs = BitSet.singleton x
-
 propUnions :: [Word16] -> Bool
 propUnions xs = all (`BitSet.member` bs) xs where
   n      = length xs
@@ -161,7 +154,6 @@ main = defaultMain tests where
           , testProperty "toList" propToList
           , testProperty "fromList" propFromList
           , testProperty "empty" propEmpty
-          , testProperty "unsafe construction from integral" propUnsafeFromIntegral
           , testProperty "unions" propUnions
           , testProperty "intersection with self" propIntersectionWithSelf
           , testProperty "intersection" propIntersection
