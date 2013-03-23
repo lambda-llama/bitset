@@ -28,6 +28,7 @@ Library
                     , deepseq                 == 1.3.*
 
   Exposed-modules:    Data.BitSet
+                    , Data.BitSet.Dynamic
 
 
 Test-suite bitset-tests
