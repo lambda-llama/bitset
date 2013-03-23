@@ -1,5 +1,5 @@
 Name:                 bitset
-Version:              1.2
+Version:              1.2.1
 Synopsis:             A compact functional set data structure.
 Description:
   A /bit set/ is a compact data structure, which maintains a set of members
@@ -11,9 +11,10 @@ Category:             Data Structures
 License:              MIT
 License-file:         LICENSE
 Data-files:           CHANGES
-Author:               Sergei Lebedev <superbobry@gmail.com>
+Author:               Sergei Lebedev
 Maintainer:           Sergei Lebedev <superbobry@gmail.com>
-Stability:            Alpha
+Bug-reports:          http://github.com/superbobry/bitset/issues
+Stability:            Experimental
 Cabal-Version:        >= 1.12
 Build-type:           Simple
 Tested-with:          GHC >= 7.4.2
