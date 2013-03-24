@@ -193,6 +193,9 @@ popCountInteger# (J# s# d#) = go 0# (int2Word# 0#) where
       else go (i +# 1#) $ acc `plusWord#` popCnt# (indexWordArray# d# i)
 
 #include "MachDeps.h"
+#ifndef WORD_SIZE_IN_BITS
+#error WORD_SIZE_IN_BITS not defined!
+#endif
 
 -- Note(superbobry): this will be irrelevant after the new GHC release.
 testBitInteger :: Integer -> Int -> Bool

@@ -19,6 +19,10 @@ Cabal-Version:        >= 1.12
 Build-type:           Simple
 Tested-with:          GHC >= 7.4.2
 
+Source-repository head
+  Type:     git
+  Location: https://github.com/superbobry/bitset
+
 Library
   Hs-source-dirs:     src
   Ghc-options:        -Wall -fno-warn-orphans
@@ -33,7 +37,6 @@ Library
                     , Data.BitSet.Dynamic
   Other-modules:      Data.BitSet.Types
 
-
 Test-suite bitset-tests
   Hs-source-dirs:     tests
   Ghc-options:        -Wall -O2 -fno-warn-orphans
@@ -47,7 +50,3 @@ Test-suite bitset-tests
                     , test-framework             == 0.6.*
                     , test-framework-quickcheck2 == 0.2.*
                     , bitset
-
-Source-repository head
-  Type:     git
-  Location: https://github.com/superbobry/bitset
