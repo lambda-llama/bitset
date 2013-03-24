@@ -187,6 +187,7 @@ popCountInteger (J# s# d#) = go 0# (int2Word# 0#) where
       if i ==# s#
       then acc
       else go (i +# 1#) $ acc `plusWord#` popCnt# (indexWordArray# d# i)
+{-# INLINE popCountInteger #-}
 
 #include "MachDeps.h"
 #ifndef WORD_SIZE_IN_BITS
