@@ -11,6 +11,6 @@ import Data.Data (Typeable)
 
 data GBitSet c a = (Enum a, Bits c, Num c) =>
                    BitSet { _n    :: Int
-                          , _bits :: !c
+                          , _bits :: c
                           }
     deriving Typeable

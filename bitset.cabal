@@ -11,7 +11,8 @@ Category:             Data Structures
 License:              MIT
 License-file:         LICENSE
 Data-files:           CHANGES
-Author:               Sergei Lebedev
+Author:               Sergei Lebedev,
+                      Aleksey Kladov <aleksey.kladov@gmail.com>
 Maintainer:           Sergei Lebedev <superbobry@gmail.com>
 Bug-reports:          http://github.com/superbobry/bitset/issues
 Stability:            Experimental

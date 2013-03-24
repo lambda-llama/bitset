@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE GADTs #-}
@@ -5,7 +6,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.BitSet
--- Copyright   :  (c) Sergei Lebedev 2013.
+-- Copyright   :  (c) Sergei Lebedev, Aleksey Kladov 2013
 --                Based on Data.BitSet (c) Denis Bueno 2008-2009
 -- License     :  MIT
 -- Maintainer  :  superbobry@gmail.com
@@ -64,6 +65,7 @@ import Prelude hiding (null)
 import Control.Applicative ((<$>))
 import Data.Bits (Bits, (.|.), (.&.), complement, bit,
                   testBit, setBit, clearBit, popCount)
+import Data.Function (on)
 import Data.List (foldl')
 import Data.Monoid (Monoid(..), (<>))
 import Text.Read (Read(..), Lexeme(..), lexP, prec, parens)
@@ -75,14 +77,11 @@ import Data.BitSet.Types (GBitSet(..))
 
 type BitSet = GBitSet
 
-instance Eq c => Eq (BitSet c a) where
-    BitSet { _n = n1, _bits = b1 } == BitSet { _n = n2 , _bits = b2 } =
-        n1 == n2 && b1 == b2
+instance Eq (BitSet c a) where
+    (==) = (==) `on` _n
 
-instance Ord c => Ord (BitSet c a) where
-    bs1 `compare` bs2 = case _n bs1 `compare` _n bs2 of
-        EQ -> _bits bs1 `compare` _bits bs2
-        r  -> r
+instance Ord (BitSet c a) where
+    compare = compare `on` _n
 
 instance (Enum a, Read a, Bits c, Num c) => Read (BitSet c a) where
     readPrec = parens . prec 10 $ do
@@ -104,7 +103,7 @@ instance NFData c => NFData (BitSet c a) where
 instance Num c => Foldable.Foldable (BitSet c) where
     foldMap f (BitSet { _n, _bits }) = go _n 0 where
         go 0 _b = mempty
-        go n b  = if _bits `testBit` b
+        go !n b = if _bits `testBit` b
                   then f (toEnum b) <> go (pred n) (succ b)
                   else go n (succ b)
 
@@ -150,32 +149,21 @@ singleton x = BitSet { _n = 1, _bits = bit $! fromEnum x }
 
 -- | /O(d)/. Insert an item into the bit set.
 insert :: a -> BitSet c a -> BitSet c a
-insert x bs@(BitSet { _n, _bits }) =
-    bs { _n    = if _bits `testBit` i then _n else _n + 1
-       , _bits = setBit _bits i
-       }
-  where
-    i :: Int
-    i = fromEnum x
+insert x bs@(BitSet { _bits }) =
+    let b = _bits `setBit` fromEnum x in bs { _n = popCount b, _bits = b }
 {-# INLINE insert #-}
 
 -- | /O(d)/. Delete an item from the bit set.
 delete :: a -> BitSet c a -> BitSet c a
-delete x bs@(BitSet { _n, _bits }) =
-    bs { _n    = if _bits `testBit` i then _n - 1 else _n
-       , _bits = clearBit _bits i
-       }
-  where
-    i :: Int
-    i  = fromEnum x
+delete x bs@(BitSet { _bits }) =
+    let b = _bits `clearBit` fromEnum x in bs { _n = popCount b, _bits = b }
 {-# INLINE delete #-}
 
 -- | /O(max(m, n))/. The union of two bit sets.
 union :: BitSet c a -> BitSet c a -> BitSet c a
 union (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
-    BitSet { _n = popCount b, _bits = b }
-  where
-    b = b1 .|. b2
+    let b = b1 .|. b2 in BitSet { _n = popCount b, _bits = b }
+
 {-# INLINE union #-}
 
 -- | /O(max(m, n))/. The union of a list of bit sets.
@@ -186,9 +174,7 @@ unions = foldl' union empty
 -- | /O(max(m, n))/. Difference of two bit sets.
 difference :: BitSet c a -> BitSet c a -> BitSet c a
 difference (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
-    BitSet { _n = popCount b, _bits = b }
-  where
-    b = b1 .&. complement b2
+    let b = b1 .&. complement b2 in BitSet { _n = popCount b, _bits = b }
 {-# INLINE difference #-}
 
 -- | /O(max(m, n))/. See 'difference'.
