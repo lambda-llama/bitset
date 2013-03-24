@@ -2,6 +2,8 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Data.BitSet.Dynamic
     (
@@ -45,13 +47,13 @@ import Data.List (foldl')
 import GHC.Base (Int(..), Word(..), divModInt#)
 import GHC.Exts (popCnt#)
 import GHC.Integer.GMP.Internals (Integer(..))
-import GHC.Prim (Int#, Word#, (+#), (==#),
+import GHC.Prim (Int#, Word#, (+#), (==#), (>=#),
                  word2Int#, int2Word#, plusWord#, indexWordArray#)
 
 import Data.BitSet.Types (GBitSet(..))
 import qualified Data.BitSet as BS
 
-type BitSet a = GBitSet Integer a
+type BitSet = GBitSet Integer
 
 -- | /O(1)/. Is the bit set empty?
 null :: BitSet a -> Bool
@@ -65,12 +67,12 @@ size = BS.size
 
 -- | /O(1)/. Ask whether the item is in the bit set.
 member :: a -> BitSet a -> Bool
-member = BS.member
+member x (BitSet { _bits }) = _bits `testBitInteger` fromEnum x
 {-# INLINE member #-}
 
 -- | /O(1)/. Ask whether the item is in the bit set.
 notMember :: a -> BitSet a -> Bool
-notMember = BS.notMember
+notMember x = not . member x
 {-# INLINE notMember #-}
 
 -- | /O(max(n, m))/. Is this a subset? (@s1 isSubsetOf s2@) tells whether
@@ -167,13 +169,15 @@ popCntInteger# (J# s# d#) = go 0# (int2Word# 0#) where
       then acc
       else go (i +# 1#) $ acc `plusWord#` popCnt# (indexWordArray# d# i)
 
-#include <MachDeps.h>
+#include "MachDeps.h"
 
--- FIXME(superbobry): why this doesn't work in 'member'?
+-- Note(superbobry): this will be irrelevant after the new GHC release.
 testBitInteger :: Integer -> Int -> Bool
-testBitInteger (S# i#) b = (I# i#) `testBit` b
-testBitInteger (J# _s# d#) (I# b#) =
-    W# (indexWordArray# d# block) `testBit` I# offset
+testBitInteger (S# i#) b = I# i# `testBit` b
+testBitInteger (J# s# d#) (I# b#) =
+    if block >=# s#
+    then False
+    else W# (indexWordArray# d# block) `testBit` I# offset
   where
     n# :: Int#
     n# = WORD_SIZE_IN_BITS#

@@ -32,6 +32,7 @@ main = do
           , bench "insert" (nf (insertS elems1) Set.empty)
           , bench "delete" (nf (deleteS elems1) s1)
           , bench "member" (nf (memberS elems1) s1)
+          , bench "notMember" (nf (notMemberS elems2) s1)
           , bench "isSubsetOf" (nf (Set.isSubsetOf s2) s1)
           , bench "isProperSubsetOf" (nf (Set.isProperSubsetOf s2) s1)
           , bench "intersection" (nf (Set.intersection s2) s1)
@@ -46,6 +47,7 @@ main = do
           , bench "insert" (nf (insertBS elems1) DBS.empty)
           , bench "delete" (nf (deleteBS elems1) bs1)
           , bench "member" (nf (memberBS elems1) bs1)
+          , bench "notMember" (nf (notMemberBS elems2) bs1)
           , bench "isSubsetOf" (nf (DBS.isSubsetOf bs2) bs1)
           , bench "isProperSubsetOf" (nf (DBS.isProperSubsetOf bs2) bs1)
           , bench "intersection" (nf (DBS.intersection bs2) bs1)
@@ -65,6 +67,12 @@ memberS xs s = all (\x -> Set.member x s) xs
 
 memberBS :: [Int] -> BitSet Int -> Bool
 memberBS xs bs = all (\x -> DBS.member x bs) xs
+
+notMemberS :: [Int] -> Set Int -> Bool
+notMemberS xs s = all (\x -> Set.notMember x s) xs
+
+notMemberBS :: [Int] -> BitSet Int -> Bool
+notMemberBS xs bs = all (\x -> DBS.notMember x bs) xs
 
 insertS :: [Int] -> Set Int -> Set Int
 insertS xs s0 = foldl' (\s x -> Set.insert x s) s0 xs

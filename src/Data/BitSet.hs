@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE GADTs #-}
@@ -103,7 +102,7 @@ instance NFData c => NFData (BitSet c a) where
     rnf (BitSet { _n, _bits }) = rnf _n `seq` rnf _bits `seq` ()
 
 instance Num c => Foldable.Foldable (BitSet c) where
-    foldMap f (BitSet { _n = !_n, _bits }) = go _n 0 where
+    foldMap f (BitSet { _n, _bits }) = go _n 0 where
         go 0 _b = mempty
         go n b  = if _bits `testBit` b
                   then f (toEnum b) <> go (pred n) (succ b)
@@ -126,7 +125,7 @@ member x (BitSet { _bits }) = _bits `testBit` fromEnum x
 
 -- | /O(1)/. Ask whether the item is in the bit set.
 notMember :: a -> BitSet c a -> Bool
-notMember bs = not . member bs
+notMember x = not . member x
 {-# INLINE notMember #-}
 
 -- | /O(max(n, m))/. Is this a subset? (@s1 isSubsetOf s2@) tells whether
