@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE MagicHash #-}
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
@@ -82,7 +83,7 @@ instance Bits FasterInteger where
     testBit (FasterInteger x) i = testBitInteger x i
     {-# INLINE testBit #-}
 
-    popCount = popCountInteger . unFI
+    popCount (FasterInteger x) = I# (word2Int# (popCountInteger x))
 
     bitSize = bitSize . unFI
     {-# INLINE bitSize #-}
@@ -179,14 +180,9 @@ fromList :: Enum a => [a] -> BitSet a
 fromList = BS.fromList
 {-# INLINE fromList #-}
 
-
-popCountInteger :: Integer -> Int
-popCountInteger x = I# (word2Int# (popCountInteger# x))
-{-# INLINE popCountInteger #-}
-
-popCountInteger# :: Integer -> Word#
-popCountInteger# (S# i#)    = popCnt# (int2Word# i#)
-popCountInteger# (J# s# d#) = go 0# (int2Word# 0#) where
+popCountInteger :: Integer -> Word#
+popCountInteger (S# i#)    = popCnt# (int2Word# i#)
+popCountInteger (J# s# d#) = go 0# (int2Word# 0#) where
   go i acc =
       if i ==# s#
       then acc
@@ -209,8 +205,8 @@ testBitInteger (J# s# d#) (I# b#) =
     n# = WORD_SIZE_IN_BITS#
 
     block# :: Int#
-    block# = b# `divInt#` n#
+    !block# = b# `divInt#` n#
 
     offset# :: Int#
-    offset# = b# `modInt#` n#
+    !offset# = b# `modInt#` n#
 {-# INLINE testBitInteger #-}
