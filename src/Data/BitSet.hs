@@ -11,19 +11,26 @@
 -- License     :  MIT
 -- Maintainer  :  superbobry@gmail.com
 -- Stability   :  experimental
--- Portability :  non-portable
-
--- A /bit set/ maintains a record of members from a type that can be
--- enumerated (i. e. has and `Enum' instance). The maximum number of elements
--- that can be stored is @maxBound :: Int@.
+-- Portability :  GHC
 --
--- To use this library, define a `Enum' instance for your data type or
--- have it derived. It is important that the values you intend to store
--- in a bit set start from 0 and go up. A value for which @fromEnum x@ is @n@
--- corresponds to bit location @n@ in an @Integer@, and thus requires that
--- @Integer@ to have at least @n@ bits.
+-- A space-efficient implementation of set data structure for enumerated
+-- data types.
 --
------------------------------------------------------------------------------
+-- /Note/: Read below the synopsis for important notes on the use of
+-- this module.
+--
+-- This module is intended to be imported @qualified@, to avoid name
+-- clashes with "Prelude" functions, e.g.
+--
+-- > import Data.BitSet (BitSet)
+-- > import qualified Data.BitSet as BS
+--
+-- The implementation is abstract with respect to conatiner type, so any
+-- numeric type with 'Bits' instance can be used as a container. However,
+-- independent of container choice, the maximum number of elements in a
+-- bit set is bounded by @maxBound :: Int@.
+--
+-- See "Data.BitSet.Dynamic" for a dynamic bit set implementation.
 
 module Data.BitSet
     (
@@ -73,7 +80,7 @@ import qualified Data.Foldable as Foldable
 
 import Control.DeepSeq (NFData(..))
 
-import Data.BitSet.Types (GBitSet(..))
+import Data.BitSet.Internal (GBitSet(..))
 
 type BitSet = GBitSet
 
@@ -142,7 +149,7 @@ empty :: (Enum a, Bits c, Num c) => BitSet c a
 empty = BitSet { _n = 0, _bits = 0 }
 {-# INLINE empty #-}
 
--- | O(setBit on Integer). Create a singleton set.
+-- | O(1). Create a singleton set.
 singleton :: (Enum a, Bits c, Num c) => a -> BitSet c a
 singleton x = BitSet { _n = 1, _bits = bit $! fromEnum x }
 {-# INLINE singleton #-}
