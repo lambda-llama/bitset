@@ -124,12 +124,12 @@ size :: BitSet c a -> Int
 size = _n
 {-# INLINE size #-}
 
--- | /O(1)/. Ask whether the item is in the bit set.
+-- | /O(d)/. Ask whether the item is in the bit set.
 member :: a -> BitSet c a -> Bool
 member x (BitSet { _bits }) = _bits `testBit` fromEnum x
 {-# INLINE member #-}
 
--- | /O(1)/. Ask whether the item is in the bit set.
+-- | /O(d)/. Ask whether the item is in the bit set.
 notMember :: a -> BitSet c a -> Bool
 notMember x = not . member x
 {-# INLINE notMember #-}
