@@ -1,3 +1,8 @@
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE UnboxedTuples #-}
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Data.BitSet.Dynamic
     (
     -- * Bit set type
@@ -35,9 +40,18 @@ module Data.BitSet.Dynamic
 
 import Prelude hiding (null)
 
+import Data.Bits ((.&.), (.|.), setBit, clearBit, testBit)
+import Data.List (foldl')
+import GHC.Base (Int(..), Word(..), divModInt#)
+import GHC.Exts (popCnt#)
+import GHC.Integer.GMP.Internals (Integer(..))
+import GHC.Prim (Int#, Word#, (+#), (==#),
+                 word2Int#, int2Word#, plusWord#, indexWordArray#)
+
+import Data.BitSet.Types (GBitSet(..))
 import qualified Data.BitSet as BS
 
-type BitSet a = BS.BitSet Integer a
+type BitSet a = GBitSet Integer a
 
 -- | /O(1)/. Is the bit set empty?
 null :: BitSet a -> Bool
@@ -80,17 +94,28 @@ singleton = BS.singleton
 
 -- | /O(1)/. Insert an item into the bit set.
 insert :: a -> BitSet a -> BitSet a
-insert = BS.insert
+insert x bs@(BitSet { _bits }) =
+    bs { _n = popCntInteger b, _bits = b }
+  where
+    b :: Integer
+    b = setBit _bits $ fromEnum x
 {-# INLINE insert #-}
 
 -- | /O(1)/. Delete an item from the bit set.
 delete :: a -> BitSet a -> BitSet a
-delete = BS.delete
+delete x bs@(BitSet { _bits }) =
+    bs { _n = popCntInteger b, _bits = b }
+  where
+    b :: Integer
+    b = clearBit _bits $ fromEnum x
 {-# INLINE delete #-}
 
 -- | /O(max(m, n))/. The union of two bit sets.
 union :: BitSet a -> BitSet a -> BitSet a
-union = BS.union
+union (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
+    BitSet { _n = popCntInteger b, _bits = b }
+  where
+    b = b1 .|. b2
 {-# INLINE union #-}
 
 -- | /O(max(m, n))/. The union of a list of bit sets.
@@ -109,7 +134,10 @@ difference = BS.difference
 
 -- | /O(max(m, n))/. The intersection of two bit sets.
 intersection :: BitSet a -> BitSet a -> BitSet a
-intersection = BS.intersection
+intersection (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
+    BitSet { _n = popCntInteger b, _bits = b }
+  where
+    b = b1 .&. b2
 {-# INLINE intersection #-}
 
 -- | /O(n)/. Convert the bit set set to a list of elements.
@@ -123,5 +151,31 @@ elems = BS.toList
 
 -- | /O(n)/. Make a bit set from a list of elements.
 fromList :: Enum a => [a] -> BitSet a
-fromList = BS.fromList
+fromList xs = BitSet { _n = popCntInteger b, _bits = b } where
+  b = foldl' (\i x -> setBit i (fromEnum x)) 0 xs
 {-# INLINE fromList #-}
+
+
+popCntInteger :: Integer -> Int
+popCntInteger x = I# (word2Int# (popCntInteger# x))
+
+popCntInteger# :: Integer -> Word#
+popCntInteger# (S# i#)    = popCnt# (int2Word# i#)
+popCntInteger# (J# s# d#) = go 0# (int2Word# 0#) where
+  go i acc =
+      if i ==# s#
+      then acc
+      else go (i +# 1#) $ acc `plusWord#` popCnt# (indexWordArray# d# i)
+
+#include <MachDeps.h>
+
+-- FIXME(superbobry): why this doesn't work in 'member'?
+testBitInteger :: Integer -> Int -> Bool
+testBitInteger (S# i#) b = (I# i#) `testBit` b
+testBitInteger (J# _s# d#) (I# b#) =
+    W# (indexWordArray# d# block) `testBit` I# offset
+  where
+    n# :: Int#
+    n# = WORD_SIZE_IN_BITS#
+
+    (# block, offset #) = b# `divModInt#` n#

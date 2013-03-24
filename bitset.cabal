@@ -21,14 +21,17 @@ Tested-with:          GHC >= 7.4.2
 
 Library
   Hs-source-dirs:     src
-  Ghc-options:        -Wall
+  Ghc-options:        -Wall -fno-warn-orphans
   Default-language:   Haskell2010
 
   Build-depends:      base                    >= 4.5.1 && < 4.7
                     , deepseq                 == 1.3.*
+                    , integer-gmp
+                    , ghc-prim
 
   Exposed-modules:    Data.BitSet
                     , Data.BitSet.Dynamic
+  Other-modules:      Data.BitSet.Types
 
 
 Test-suite bitset-tests

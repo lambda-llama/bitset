@@ -1,6 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE GADTs #-}
 
 -----------------------------------------------------------------------------
@@ -65,7 +65,6 @@ import Prelude hiding (null)
 import Control.Applicative ((<$>))
 import Data.Bits (Bits, (.|.), (.&.), complement, bit,
                   testBit, setBit, clearBit, popCount)
-import Data.Data (Typeable)
 import Data.List (foldl')
 import Data.Monoid (Monoid(..), (<>))
 import Text.Read (Read(..), Lexeme(..), lexP, prec, parens)
@@ -73,11 +72,9 @@ import qualified Data.Foldable as Foldable
 
 import Control.DeepSeq (NFData(..))
 
-data BitSet c a = (Enum a, Bits c, Num c) =>
-                  BitSet { _n    :: Int
-                         , _bits :: !c
-                         }
-    deriving Typeable
+import Data.BitSet.Types (GBitSet(..))
+
+type BitSet = GBitSet
 
 instance Eq c => Eq (BitSet c a) where
     BitSet { _n = n1, _bits = b1 } == BitSet { _n = n2 , _bits = b2 } =
@@ -124,7 +121,7 @@ size = _n
 
 -- | /O(1)/. Ask whether the item is in the bit set.
 member :: a -> BitSet c a -> Bool
-member x (BitSet { _bits }) = testBit _bits (fromEnum x)
+member x (BitSet { _bits }) = _bits `testBit` fromEnum x
 {-# INLINE member #-}
 
 -- | /O(1)/. Ask whether the item is in the bit set.
