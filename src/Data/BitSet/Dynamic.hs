@@ -85,8 +85,7 @@ import Data.BitSet.Generic (GBitSet(..))
 import qualified Data.BitSet.Generic as BS
 
 newtype FasterInteger = FasterInteger { unFI :: Integer }
-       deriving (Read, Show, Eq, Ord, Enum, Integral, Num, Real,
-                 NFData)
+    deriving (Read, Show, Eq, Ord, Enum, Integral, Num, Real, NFData)
 
 instance Bits FasterInteger where
     FasterInteger x .&. FasterInteger y = FasterInteger $ x .&. y
