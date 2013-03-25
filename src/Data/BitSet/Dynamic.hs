@@ -33,7 +33,6 @@ module Data.BitSet.Dynamic
     (
     -- * Bit set type
       BitSet
-    , FasterInteger
 
     -- * Operators
     , (\\)
