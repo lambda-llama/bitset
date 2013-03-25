@@ -40,6 +40,12 @@ module Data.BitSet
     -- * Operators
     , (\\)
 
+    -- * Construction
+    , empty
+    , singleton
+    , insert
+    , delete
+
     -- * Query
     , null
     , size
@@ -48,35 +54,33 @@ module Data.BitSet
     , isSubsetOf
     , isProperSubsetOf
 
-    -- * Construction
-    , empty
-    , singleton
-    , insert
-    , delete
-
     -- * Combine
     , union
     , unions
     , difference
     , intersection
 
-    -- * Conversion
-    -- ** List
-    , elems
+    -- * Transformations
+    , map
+
+    -- * Filter
+    , filter
+
+    -- * Lists
     , toList
     , fromList
     ) where
 
-import Prelude hiding (null)
+import Prelude hiding (null, map, filter)
 
 import Control.Applicative ((<$>))
 import Data.Bits (Bits, (.|.), (.&.), complement, bit,
                   testBit, setBit, clearBit, popCount)
 import Data.Function (on)
-import Data.List (foldl')
 import Data.Monoid (Monoid(..), (<>))
 import Text.Read (Read(..), Lexeme(..), lexP, prec, parens)
 import qualified Data.Foldable as Foldable
+import qualified Data.List as List
 
 import Control.DeepSeq (NFData(..))
 
@@ -175,7 +179,7 @@ union (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
 
 -- | /O(max(m, n))/. The union of a list of bit sets.
 unions :: (Enum a, Bits c, Num c) => [BitSet c a] -> BitSet c a
-unions = foldl' union empty
+unions = List.foldl' union empty
 {-# INLINE unions #-}
 
 -- | /O(max(m, n))/. Difference of two bit sets.
@@ -196,17 +200,22 @@ intersection (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
     b = b1 .&. b2
 {-# INLINE intersection #-}
 
+-- | /O(d * n)/ Transform this bit set by applying a function to every
+-- value. Resulting bit set may be smaller then the original.
+map :: (Enum a, Enum b, Bits c, Num c) => (a -> b) -> BitSet c a -> BitSet c b
+map f = fromList . List.map f . toList
+
+-- | /O(d * n)/ Filter this bit set by retaining only elements satisfying
+-- predicate.
+filter :: (Enum a, Bits c, Num c) => (a -> Bool) -> BitSet c a -> BitSet c a
+filter f = fromList . List.filter f . toList
+
 -- | /O(d * n)/. Convert the bit set set to a list of elements.
 toList :: Num c => BitSet c a -> [a]
 toList = Foldable.toList
 
--- | /O(d * n)/. An alias to 'toList'.
-elems :: Num c => BitSet c a -> [a]
-elems = toList
-{-# INLINE elems #-}
-
 -- | /O(d * n)/. Make a bit set from a list of elements.
 fromList :: (Enum a, Bits c, Num c) => [a] -> BitSet c a
 fromList xs = BitSet { _n = popCount b, _bits = b } where
-  b = foldl' (\i x -> setBit i (fromEnum x)) 0 xs
+  b = List.foldl' (\i x -> setBit i (fromEnum x)) 0 xs
 {-# INLINE fromList #-}

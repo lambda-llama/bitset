@@ -37,6 +37,12 @@ module Data.BitSet.Dynamic
     -- * Operators
     , (\\)
 
+    -- * Construction
+    , empty
+    , singleton
+    , insert
+    , delete
+
     -- * Query
     , null
     , size
@@ -45,26 +51,24 @@ module Data.BitSet.Dynamic
     , isSubsetOf
     , isProperSubsetOf
 
-    -- * Construction
-    , empty
-    , singleton
-    , insert
-    , delete
-
     -- * Combine
     , union
     , unions
     , difference
     , intersection
 
-    -- * Conversion
-    -- ** List
-    , elems
+    -- * Transformations
+    , map
+
+    -- * Filter
+    , filter
+
+    -- * Lists
     , toList
     , fromList
     ) where
 
-import Prelude hiding (null)
+import Prelude hiding (null, map, filter)
 
 import Data.Bits (Bits(..))
 import GHC.Base (Int(..), divInt#, modInt#)
@@ -191,14 +195,19 @@ intersection :: BitSet a -> BitSet a -> BitSet a
 intersection = BS.intersection
 {-# INLINE intersection #-}
 
+-- | /O(n)/ Transform this bit set by applying a function to every value.
+-- Resulting bit set may be smaller then the original.
+map :: (Enum a, Enum b) => (a -> b) -> BitSet a -> BitSet b
+map = BS.map
+
+-- | /O(n)/ Filter this bit set by retaining only elements satisfying a
+-- predicate.
+filter :: Enum a => (a -> Bool) -> BitSet a -> BitSet a
+filter = BS.filter
+
 -- | /O(n)/. Convert the bit set set to a list of elements.
 toList :: BitSet a -> [a]
 toList = BS.toList
-
--- | /O(n)/. An alias to @toList@.
-elems :: BitSet a -> [a]
-elems = BS.toList
-{-# INLINE elems #-}
 
 -- | /O(n)/. Make a bit set from a list of elements.
 fromList :: Enum a => [a] -> BitSet a

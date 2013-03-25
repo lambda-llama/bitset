@@ -38,6 +38,8 @@ main = do
           , bench "intersection" (nf (Set.intersection s2) s1)
           , bench "difference" (nf (Set.difference s2) s1)
           , bench "union" (nf (Set.union s2) s1)
+          , bench "map" (nf (Set.map id) s1)
+          , bench "filter" (nf (Set.filter $ const True) s1)
           ]
 
         , bgroup "BitSet"
@@ -53,6 +55,8 @@ main = do
           , bench "intersection" (nf (DBS.intersection bs2) bs1)
           , bench "difference" (nf (DBS.difference bs2) bs1)
           , bench "union" (nf (DBS.union bs2) bs1)
+          , bench "map" (nf (DBS.map id) bs1)
+          , bench "filter" (nf (DBS.filter $ const True) bs1)
           ]
         ]
   where
