@@ -35,6 +35,7 @@ Library
   Exposed-modules:    Data.BitSet
                     , Data.BitSet.Dynamic
                     , Data.BitSet.Generic
+                    , Data.BitSet.Word
 
 Test-suite bitset-tests
   Hs-source-dirs:     tests
