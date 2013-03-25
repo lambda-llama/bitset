@@ -18,6 +18,9 @@ import qualified Data.BitSet as BS
 instance (Arbitrary a, Enum a) => Arbitrary (BitSet a) where
     arbitrary = BS.fromList <$> arbitrary
 
+instance Show (Word16 -> a) where
+    show = const "FUNCTION"
+
 propSize :: [Word16] -> Bool
 propSize = go . nub where
   go xs = length xs == BS.size (BS.fromList xs)
@@ -149,6 +152,12 @@ propIsSubsetOf xs =
 propShowRead :: BitSet Word16 -> Bool
 propShowRead bs = bs == (read $ show bs)
 
+propMap :: BitSet Word16 -> (Word16 -> Word16) -> Bool
+propMap bs f = BS.map f bs == (BS.fromList $ map f $ BS.toList bs)
+
+propFilter :: BitSet Word16 -> (Word16 -> Bool) -> Bool
+propFilter bs f = BS.filter f bs == (BS.fromList $ filter f $ BS.toList bs)
+
 main :: IO ()
 main = defaultMain tests where
   tests :: [Test]
@@ -172,4 +181,6 @@ main = defaultMain tests where
           , testProperty "is subset of self" propIsSubsetOfSelf
           , testProperty "is subset of" propIsSubsetOf
           , testProperty "show read" propShowRead
+          , testProperty "map" propMap
+          , testProperty "filter" propFilter
           ]
