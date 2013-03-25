@@ -9,8 +9,8 @@ import Criterion.Main (defaultMain, bench, bgroup, nf)
 import Data.Set (Set)
 import qualified Data.Set as Set
 
-import Data.BitSet.Dynamic (BitSet)
-import qualified Data.BitSet.Dynamic as DBS
+import Data.BitSet (BitSet)
+import qualified Data.BitSet as BS
 
 data B = forall a. NFData a => B a
 
@@ -19,8 +19,8 @@ instance NFData B where
 
 main :: IO ()
 main = do
-    let bs1 = DBS.fromList elems1
-        bs2 = DBS.fromList elems2
+    let bs1 = BS.fromList elems1
+        bs2 = BS.fromList elems2
         s1  = Set.fromList elems1
         s2  = Set.fromList elems2
     return $ rnf [B bs1, B bs2, B s1, B s2]
@@ -43,20 +43,20 @@ main = do
           ]
 
         , bgroup "BitSet"
-          [ bench "fromList" (nf DBS.fromList elems1)
-          , bench "toList" (nf DBS.toList bs1)
-          , bench "singleton" (nf DBS.singleton n)
-          , bench "insert" (nf (insertBS elems1) DBS.empty)
+          [ bench "fromList" (nf BS.fromList elems1)
+          , bench "toList" (nf BS.toList bs1)
+          , bench "singleton" (nf BS.singleton n)
+          , bench "insert" (nf (insertBS elems1) BS.empty)
           , bench "delete" (nf (deleteBS elems1) bs1)
           , bench "member" (nf (memberBS elems1) bs1)
           , bench "notMember" (nf (notMemberBS elems2) bs1)
-          , bench "isSubsetOf" (nf (DBS.isSubsetOf bs2) bs1)
-          , bench "isProperSubsetOf" (nf (DBS.isProperSubsetOf bs2) bs1)
-          , bench "intersection" (nf (DBS.intersection bs2) bs1)
-          , bench "difference" (nf (DBS.difference bs2) bs1)
-          , bench "union" (nf (DBS.union bs2) bs1)
-          , bench "map" (nf (DBS.map id) bs1)
-          , bench "filter" (nf (DBS.filter $ const True) bs1)
+          , bench "isSubsetOf" (nf (BS.isSubsetOf bs2) bs1)
+          , bench "isProperSubsetOf" (nf (BS.isProperSubsetOf bs2) bs1)
+          , bench "intersection" (nf (BS.intersection bs2) bs1)
+          , bench "difference" (nf (BS.difference bs2) bs1)
+          , bench "union" (nf (BS.union bs2) bs1)
+          , bench "map" (nf (BS.map id) bs1)
+          , bench "filter" (nf (BS.filter $ const True) bs1)
           ]
         ]
   where
@@ -70,22 +70,22 @@ memberS :: [Int] -> Set Int -> Bool
 memberS xs s = all (\x -> Set.member x s) xs
 
 memberBS :: [Int] -> BitSet Int -> Bool
-memberBS xs bs = all (\x -> DBS.member x bs) xs
+memberBS xs bs = all (\x -> BS.member x bs) xs
 
 notMemberS :: [Int] -> Set Int -> Bool
 notMemberS xs s = all (\x -> Set.notMember x s) xs
 
 notMemberBS :: [Int] -> BitSet Int -> Bool
-notMemberBS xs bs = all (\x -> DBS.notMember x bs) xs
+notMemberBS xs bs = all (\x -> BS.notMember x bs) xs
 
 insertS :: [Int] -> Set Int -> Set Int
 insertS xs s0 = foldl' (\s x -> Set.insert x s) s0 xs
 
 insertBS :: [Int] -> BitSet Int -> BitSet Int
-insertBS xs bs0 = foldl' (\bs x -> DBS.insert x bs) bs0 xs
+insertBS xs bs0 = foldl' (\bs x -> BS.insert x bs) bs0 xs
 
 deleteS :: [Int] -> Set Int -> Set Int
 deleteS xs s0 = foldl' (\s x -> Set.delete x s) s0 xs
 
 deleteBS :: [Int] -> BitSet Int -> BitSet Int
-deleteBS xs bs0 = foldl' (\bs x -> DBS.delete x bs) bs0 xs
+deleteBS xs bs0 = foldl' (\bs x -> BS.delete x bs) bs0 xs

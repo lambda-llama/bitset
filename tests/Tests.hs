@@ -12,84 +12,83 @@ import Test.Framework (Test, defaultMain)
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.QuickCheck (Property, Arbitrary(..), (==>), classify)
 
-import Data.BitSet.Dynamic (BitSet)
-import qualified Data.BitSet.Dynamic as DBS
+import Data.BitSet (BitSet)
+import qualified Data.BitSet as BS
 
 instance (Arbitrary a, Enum a) => Arbitrary (BitSet a) where
-    arbitrary = DBS.fromList <$> arbitrary
-
+    arbitrary = BS.fromList <$> arbitrary
 
 propSize :: [Word16] -> Bool
 propSize = go . nub where
-  go xs = length xs == DBS.size (DBS.fromList xs)
+  go xs = length xs == BS.size (BS.fromList xs)
 
 propSizeAfterInsert :: Word16 -> BitSet Word16 -> Bool
 propSizeAfterInsert x bs =
-    DBS.size (DBS.insert x bs) == DBS.size bs + diff
+    BS.size (BS.insert x bs) == BS.size bs + diff
   where
     diff :: Int
-    diff = if x `DBS.member` bs then 0 else 1
+    diff = if x `BS.member` bs then 0 else 1
 
 propSizeAfterDelete :: Word16 -> BitSet Word16 -> Bool
 propSizeAfterDelete x bs =
-    DBS.size (DBS.delete x bs) == DBS.size bs - diff
+    BS.size (BS.delete x bs) == BS.size bs - diff
   where
     diff :: Int
-    diff = if x `DBS.member` bs then 1 else 0
+    diff = if x `BS.member` bs then 1 else 0
 
 propInsertMember :: Word16 -> BitSet Word16 -> Bool
-propInsertMember x bs = x `DBS.member` DBS.insert x bs
+propInsertMember x bs = x `BS.member` BS.insert x bs
 
 propDeleteMember :: Word16 -> BitSet Word16 -> Bool
-propDeleteMember x bs = x `DBS.notMember` DBS.delete x bs
+propDeleteMember x bs = x `BS.notMember` BS.delete x bs
 
 propInsertDeleteIdempotent :: Word16 -> BitSet Word16 -> Property
 propInsertDeleteIdempotent x bs =
-    x `DBS.notMember` bs ==>
-    bs == DBS.delete x (DBS.insert x bs)
+    x `BS.notMember` bs ==>
+    bs == BS.delete x (BS.insert x bs)
 
 propDeleteIdempotent :: Word16 -> BitSet Word16 -> Property
 propDeleteIdempotent x bs =
-    classify (x `DBS.member` bs) "x in bs" $
-    classify (x `DBS.notMember` bs) "x not in bs" $
-    DBS.delete x bs == DBS.delete x (DBS.delete x bs)
+    classify (x `BS.member` bs) "x in bs" $
+    classify (x `BS.notMember` bs) "x not in bs" $
+    BS.delete x bs == BS.delete x (BS.delete x bs)
 
 propInsertIdempotent :: Word16 -> BitSet Word16 -> Bool
 propInsertIdempotent x bs =
-    DBS.insert x bs == DBS.insert x (DBS.insert x bs)
+    BS.insert x bs == BS.insert x (BS.insert x bs)
 
 propToList :: [Word16] -> Bool
-propToList xs = nub (sort xs) == DBS.toList bs where
+propToList xs = nub (sort xs) == BS.toList bs where
   bs :: BitSet Word16
-  bs = DBS.fromList xs
+  bs = BS.fromList xs
 
 propFromList :: [Word16] -> Bool
-propFromList xs = all (`DBS.member` bs) xs where
+propFromList xs = all (`BS.member` bs) xs where
   bs :: BitSet Word16
-  bs = DBS.fromList xs
+  bs = BS.fromList xs
 
 propEmpty :: Word16 -> Bool
-propEmpty x = x `DBS.notMember` DBS.empty
+propEmpty x = x `BS.notMember` BS.empty
 
 propUnions :: [Word16] -> Bool
-propUnions xs = all (`DBS.member` bs) xs where
+propUnions xs = all (`BS.member` bs) xs where
   n      = length xs
   (l, r) = splitAt (n `div` 2) xs
 
   bs :: BitSet Word16
-  bs = DBS.unions $ map DBS.fromList [l, r, l, r, l]
+  bs = BS.unions $ map BS.fromList [l, r, l, r, l]
 
 propIntersectionWithSelf :: [Word16] -> Bool
-propIntersectionWithSelf xs = all (`DBS.member` bs) xs
+propIntersectionWithSelf xs = all (`BS.member` bs) xs
   where
     bs :: BitSet Word16
-    bs = let bs0 = DBS.fromList xs in
-         bs0 `DBS.intersection` bs0
+    bs = let bs0 = BS.fromList xs in
+         bs0 `BS.intersection` bs0
 
 propIntersection :: [Word16] -> Bool
 propIntersection xs =
-    all (`DBS.member` bs) (l `intersect` r) &&
-    all (`DBS.notMember` bs) (dl `union` dr)
+    all (`BS.member` bs) (l `intersect` r) &&
+    all (`BS.notMember` bs) (dl `union` dr)
   where
     n      = length xs
     (l, r) = splitAt (n `div` 2) $ nub xs
@@ -98,28 +97,28 @@ propIntersection xs =
     dr = r \\ l
 
     bs :: BitSet Word16
-    bs = let bs1 = DBS.fromList l
-             bs2 = DBS.fromList r
-         in bs1 `DBS.intersection` bs2
+    bs = let bs1 = BS.fromList l
+             bs2 = BS.fromList r
+         in bs1 `BS.intersection` bs2
 
 propDifferenceWithSelf :: [Word16] -> Bool
-propDifferenceWithSelf xs = bs == DBS.empty where
+propDifferenceWithSelf xs = bs == BS.empty where
   bs :: BitSet Word16
-  bs = let bs0 = DBS.fromList xs in
-       bs0 `DBS.difference` bs0
+  bs = let bs0 = BS.fromList xs in
+       bs0 `BS.difference` bs0
 
 propDifference :: [Word16] -> Property
 propDifference xs = n > 0 ==>
-                    all (`DBS.member` bs) (l \\ r) &&
-                    all (`DBS.notMember` bs) (l `intersect` r)
+                    all (`BS.member` bs) (l \\ r) &&
+                    all (`BS.notMember` bs) (l `intersect` r)
   where
     n      = length xs
     (l, r) = splitAt (n `div` 2) $ nub xs
 
     bs :: BitSet Word16
-    bs = let bs1 = DBS.fromList l
-             bs2 = DBS.fromList r
-         in bs1 `DBS.difference` bs2
+    bs = let bs1 = BS.fromList l
+             bs2 = BS.fromList r
+         in bs1 `BS.difference` bs2
 
 propMonoidLaws :: BitSet Word16 -> BitSet Word16 -> BitSet Word16 -> Bool
 propMonoidLaws bs1 bs2 bs3 =
@@ -128,24 +127,24 @@ propMonoidLaws bs1 bs2 bs3 =
     bs1 <> (bs2 <> bs3) == (bs1 <> bs2) <> bs3
 
 propIsSubsetOfSelf :: BitSet Word16 -> Bool
-propIsSubsetOfSelf bs = bs `DBS.isSubsetOf` bs &&
-                        not (bs `DBS.isProperSubsetOf` bs)
+propIsSubsetOfSelf bs = bs `BS.isSubsetOf` bs &&
+                        not (bs `BS.isProperSubsetOf` bs)
 
 propIsSubsetOf :: [Word16] -> Bool
 propIsSubsetOf xs =
-    bs1 `DBS.isSubsetOf` bs &&
-    bs2 `DBS.isSubsetOf` bs
+    bs1 `BS.isSubsetOf` bs &&
+    bs2 `BS.isSubsetOf` bs
   where
     n = length xs
 
     bs :: BitSet Word16
-    bs = DBS.fromList xs
+    bs = BS.fromList xs
 
     bs1 :: BitSet Word16
-    bs1 = DBS.fromList $ take (n `div` 2) xs
+    bs1 = BS.fromList $ take (n `div` 2) xs
 
     bs2 :: BitSet Word16
-    bs2 = DBS.fromList $ drop (n `div` 2) xs
+    bs2 = BS.fromList $ drop (n `div` 2) xs
 
 main :: IO ()
 main = defaultMain tests where

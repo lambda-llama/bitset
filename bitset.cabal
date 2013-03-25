@@ -31,7 +31,6 @@ Library
                     , ghc-prim
 
   Exposed-modules:    Data.BitSet
-                    , Data.BitSet.Dynamic
                     , Data.BitSet.Internal
 
 Test-suite bitset-tests
