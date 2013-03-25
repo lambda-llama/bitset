@@ -7,7 +7,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.BitSet.Dynamic
--- Copyright   :  (c) Sergei Lebedev, Aleksey Kladov 2013
+-- Copyright   :  (c) Sergei Lebedev, Aleksey Kladov, Fedor Gogolev 2013
 --                Based on Data.BitSet (c) Denis Bueno 2008-2009
 -- License     :  MIT
 -- Maintainer  :  superbobry@gmail.com

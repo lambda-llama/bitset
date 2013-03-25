@@ -8,7 +8,9 @@ Category:             Data Structures
 License:              MIT
 License-file:         LICENSE
 Data-files:           CHANGES
-Author:               Sergei Lebedev, Aleksey Kladov
+Author:               Sergei Lebedev <superbobry@gmail.com>
+                    , Aleksey Kladov <aleksey.kladov@gmail.com>
+                    , Fedor Gogolev <knsd@knsd.net>
 Maintainer:           superbobry@gmail.com
 Bug-reports:          http://github.com/superbobry/bitset/issues
 Stability:            Experimental
