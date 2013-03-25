@@ -115,7 +115,7 @@ instance Bits FasterInteger where
     setBit (FasterInteger x) i = FasterInteger $ setBit x i
     {-# SPECIALIZE INLINE setBit :: FasterInteger -> Int -> FasterInteger #-}
 
-    clearBit (FasterInteger x) i = FasterInteger $ clearBit x i
+    clearBit (FasterInteger x) = FasterInteger . clearBit x
     {-# SPECIALIZE INLINE clearBit :: FasterInteger -> Int -> FasterInteger #-}
 
     popCount (FasterInteger x) = I# (word2Int# (popCountInteger x))
