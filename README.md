@@ -26,8 +26,8 @@ main = print $ bs \\ BitSet.singleton Blue where
 Benchmarks
 ----------
 
-To run benchmarks, create a separate `cabal-dev` environment in `benchmarks/`
-directory and:
+To run [benchmarks] [benchmarks], create a separate `cabal-dev` environment
+in `benchmarks/` directory and:
 
 ```bash
 $ cd ./benchmarks
@@ -37,3 +37,4 @@ $ ./dist/build/bitset-benchmarks/bitset-benchmarks -o dist/bench.html
 
 [travis]: http://travis-ci.org/superbobry/bitset
 [travis-img]: https://secure.travis-ci.org/superbobry/bitset.png
+[benchmarks]: http://superbobry.github.com/bitset/
