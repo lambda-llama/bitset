@@ -47,3 +47,19 @@ Test-suite bitset-tests
                     , test-framework             == 0.6.*
                     , test-framework-quickcheck2 == 0.2.*
                     , bitset
+
+Benchmark bitset-benchmarks
+  Hs-source-dirs:     src benchmarks
+  Ghc-options:        -Wall -O2 -optc-O3 -optc-msse4.1 -fno-warn-orphans
+  Default-language:   Haskell2010
+
+  Type:               exitcode-stdio-1.0
+  Main-is:            Benchmarks.hs
+
+  Build-depends:      base                        >= 4.4.0 || < 4.7
+                    , deepseq                     == 1.3.*
+                    , integer-gmp
+                    , ghc-prim
+
+                    , criterion                   == 0.6.*
+                    , containers                  >= 0.4.2
