@@ -32,8 +32,8 @@
 module Data.BitSet.Dynamic
     (
     -- * Bit set type
-      BitSet
-
+      FasterInteger
+    , BitSet
     -- * Operators
     , (\\)
 
@@ -83,6 +83,7 @@ import Control.DeepSeq (NFData(..))
 import Data.BitSet.Generic (GBitSet(..))
 import qualified Data.BitSet.Generic as BS
 
+-- | A wrapper around 'Integer' which provides faster bit-level operations.
 newtype FasterInteger = FasterInteger { unFI :: Integer }
     deriving (Read, Show, Eq, Ord, Enum, Integral, Num, Real, NFData)
 
