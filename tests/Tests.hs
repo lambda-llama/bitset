@@ -146,6 +146,9 @@ propIsSubsetOf xs =
     bs2 :: BitSet Word16
     bs2 = BS.fromList $ drop (n `div` 2) xs
 
+propShowRead :: BitSet Word16 -> Bool
+propShowRead bs = bs == (read $ show bs)
+
 main :: IO ()
 main = defaultMain tests where
   tests :: [Test]
@@ -168,4 +171,5 @@ main = defaultMain tests where
           , testProperty "monoid laws" propMonoidLaws
           , testProperty "is subset of self" propIsSubsetOfSelf
           , testProperty "is subset of" propIsSubsetOf
+          , testProperty "show read" propShowRead
           ]
