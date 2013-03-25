@@ -43,7 +43,7 @@ main = do
           , bench "intersection" (nf (Set.intersection s2) s1)
           , bench "difference" (nf (Set.difference s2) s1)
           , bench "union" (nf (Set.union s2) s1)
-          , bench "map" (nf (Set.map id) s1)
+          , bench "map" (nf (Set.map (+ n)) s1)
           , bench "filter" (nf (Set.filter odd) s1)
           ]
 
@@ -60,7 +60,7 @@ main = do
           , bench "intersection" (nf (BS.intersection bs2) bs1)
           , bench "difference" (nf (BS.difference bs2) bs1)
           , bench "union" (nf (BS.union bs2) bs1)
-          , bench "map" (nf (BS.map id) bs1)
+          , bench "map" (nf (BS.map (+ n)) bs1)
           , bench "filter" (nf (BS.filter odd) bs1)
           ]
         ]
