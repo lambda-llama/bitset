@@ -26,6 +26,7 @@
 -- bit set is bounded by @maxBound :: Int@.
 
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -33,7 +34,8 @@
 module Data.BitSet.Generic
     (
     -- * Bit set type
-      GBitSet(..)
+      GBitSet
+
     -- * Operators
     , (\\)
 
@@ -66,6 +68,10 @@ module Data.BitSet.Generic
     -- * Lists
     , toList
     , fromList
+
+    -- * Internal
+    , toBits
+    , unsafeFromBits
     ) where
 
 import Prelude hiding (null, map, filter)
@@ -210,7 +216,7 @@ map f = fromList . List.map f . toList
 filter :: (Enum a, Bits c, Num c) => (a -> Bool) -> GBitSet c a -> GBitSet c a
 filter f = fromList . List.filter f . toList
 
--- | /O(d * n)/. Convert the bit set set to a list of elements.
+-- | /O(d * n)/. Convert this bit set set to a list of elements.
 toList :: Num c => GBitSet c a -> [a]
 toList = Foldable.toList
 
@@ -219,3 +225,16 @@ fromList :: (Enum a, Bits c, Num c) => [a] -> GBitSet c a
 fromList xs = BitSet { _n = popCount b, _bits = b } where
   b = List.foldl' (\i x -> setBit i (fromEnum x)) 0 xs
 {-# INLINE fromList #-}
+
+-- | /O(1)/. Internal function, which extracts the underlying container
+-- from the bit set.
+toBits :: GBitSet c a -> c
+toBits = _bits
+{-# INLINE toBits #-}
+
+-- | /O(1)/. Internal function, which constructs a bit set, using a given
+-- container value. Highly unsafe, because we don't check if bits in the
+-- given value correspond to valid instances of type @a@.
+unsafeFromBits :: (Enum a, Bits c, Num c) => c -> GBitSet c a
+unsafeFromBits b = BitSet { _n = popCount b, _bits = b }
+{-# INLINE unsafeFromBits #-}

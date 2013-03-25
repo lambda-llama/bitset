@@ -80,7 +80,7 @@ import GHC.Word (Word(..))
 
 import Control.DeepSeq (NFData(..))
 
-import Data.BitSet.Generic (GBitSet(..))
+import Data.BitSet.Generic (GBitSet)
 import qualified Data.BitSet.Generic as BS
 
 -- | A wrapper around 'Integer' which provides faster bit-level operations.
