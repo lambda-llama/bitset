@@ -31,7 +31,8 @@ Library
                     , ghc-prim
 
   Exposed-modules:    Data.BitSet
-                    , Data.BitSet.Internal
+                    , Data.BitSet.Dynamic
+                    , Data.BitSet.Generic
 
 Test-suite bitset-tests
   Hs-source-dirs:     tests

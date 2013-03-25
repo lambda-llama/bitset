@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Data.BitSet.Internal
+-- Module      :  Data.BitSet.Generic
 -- Copyright   :  (c) Sergei Lebedev, Aleksey Kladov 2013
 --                Based on Data.BitSet (c) Denis Bueno 2008-2009
 -- License     :  MIT
@@ -17,8 +17,8 @@
 -- This module is intended to be imported @qualified@, to avoid name
 -- clashes with "Prelude" functions, e.g.
 --
--- > import Data.BitSet.Internal (BitSet)
--- > import qualified Data.BitSet.Internal as BS
+-- > import Data.BitSet.Generic (BitSet)
+-- > import qualified Data.BitSet.Generic as BS
 --
 -- The implementation is abstract with respect to conatiner type, so any
 -- numeric type with 'Bits' instance can be used as a container. However,
@@ -30,7 +30,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module Data.BitSet.Internal
+module Data.BitSet.Generic
     (
     -- * Bit set type
       GBitSet(..)
