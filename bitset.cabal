@@ -67,4 +67,4 @@ Benchmark bitset-benchmarks
                     , criterion                   == 0.6.*
                     , containers                  >= 0.4.2
                     , random                      == 1.0.*
-                    , random-shuffle              == 0.0.3
+                    , random-shuffle              == 0.0.4
