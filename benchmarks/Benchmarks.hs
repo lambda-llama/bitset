@@ -7,6 +7,8 @@ import Data.List (foldl')
 import Control.DeepSeq (NFData(..))
 import Criterion.Main (defaultMain, bench, bgroup, nf)
 import Data.Set (Set)
+import System.Random (mkStdGen)
+import System.Random.Shuffle (shuffle')
 import qualified Data.Set as Set
 
 import Data.BitSet (BitSet)
@@ -23,16 +25,19 @@ main = do
         bs2 = BS.fromList elems2
         s1  = Set.fromList elems1
         s2  = Set.fromList elems2
-    return $ rnf [B bs1, B bs2, B s1, B s2]
+        r   = mkStdGen 42
+        shuffledElems1 = shuffle' elems1 n r
+        shuffledElems2 = shuffle' elems2 (n `div` 2) r
+    return $ rnf [B bs1, B bs2, B s1, B s2, B shuffledElems1, B shuffledElems2]
     defaultMain
         [ bgroup "Set"
-          [ bench "fromList" (nf Set.fromList elems1)
+          [ bench "fromList" (nf Set.fromList shuffledElems1)
           , bench "toList" (nf Set.toList s1)
           , bench "singleton" (nf Set.singleton n)
           , bench "insert" (nf (insertS elems1) Set.empty)
           , bench "delete" (nf (deleteS elems1) s1)
-          , bench "member" (nf (memberS elems1) s1)
-          , bench "notMember" (nf (notMemberS elems2) s1)
+          , bench "member" (nf (memberS shuffledElems1) s1)
+          , bench "notMember" (nf (notMemberS shuffledElems2) s1)
           , bench "isSubsetOf" (nf (Set.isSubsetOf s2) s1)
           , bench "isProperSubsetOf" (nf (Set.isProperSubsetOf s2) s1)
           , bench "intersection" (nf (Set.intersection s2) s1)
@@ -43,13 +48,13 @@ main = do
           ]
 
         , bgroup "BitSet"
-          [ bench "fromList" (nf BS.fromList elems1)
+          [ bench "fromList" (nf BS.fromList shuffledElems1)
           , bench "toList" (nf BS.toList bs1)
           , bench "singleton" (nf BS.singleton n)
           , bench "insert" (nf (insertBS elems1) BS.empty)
           , bench "delete" (nf (deleteBS elems1) bs1)
-          , bench "member" (nf (memberBS elems1) bs1)
-          , bench "notMember" (nf (notMemberBS elems2) bs1)
+          , bench "member" (nf (memberBS shuffledElems1) bs1)
+          , bench "notMember" (nf (notMemberBS shuffledElems2) bs1)
           , bench "isSubsetOf" (nf (BS.isSubsetOf bs2) bs1)
           , bench "isProperSubsetOf" (nf (BS.isProperSubsetOf bs2) bs1)
           , bench "intersection" (nf (BS.intersection bs2) bs1)
