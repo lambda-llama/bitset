@@ -1,17 +1,15 @@
 bitset  [![Build Status][travis-img]][travis]
 ======
 
-A /bit set/ is a compact data structure, which maintains a set of members
+A _bit set_ is a compact data structure, which maintains a set of members
 from a type that can be enumerated (i. e. has an `Enum` instance). Current
 implementation is abstract with respect to conatiner type, so any
 numeric type with `Bits` instance can be used as a container. However,
 independent of container choice, the maximum number of elements in a
 bit set is bounded by `maxBound :: Int`.
 
-See `Data.BitSet.Dynamic` for a dynamic bit set implementation.
-
-Example
--------
+Here's a usage example for a dynamic bit set, which uses `Integer` for
+storing bits:
 
 ```haskell
 import Data.BitSet (BitSet, (\\))
