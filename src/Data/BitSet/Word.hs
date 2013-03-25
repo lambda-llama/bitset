@@ -56,12 +56,12 @@ size = BS.size
 {-# INLINE size #-}
 
 -- | /O(1)/. Ask whether the item is in the bit set.
-member :: a -> BitSet a -> Bool
+member :: Enum a => a -> BitSet a -> Bool
 member = BS.member
 {-# INLINE member #-}
 
 -- | /O(1)/. Ask whether the item is in the bit set.
-notMember :: a -> BitSet a -> Bool
+notMember :: Enum a => a -> BitSet a -> Bool
 notMember = BS.notMember
 {-# INLINE notMember #-}
 

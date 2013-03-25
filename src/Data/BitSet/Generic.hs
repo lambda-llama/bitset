@@ -89,8 +89,8 @@ import qualified Data.List as List
 
 -- | A bit set with unspecified container type.
 data GBitSet c a = (Enum a, Bits c, Num c) =>
-                   BitSet { _n    :: Int  -- ^ Number of elements in the bit set.
-                          , _bits :: c    -- ^ Bit container.
+                   BitSet { _n    :: !Int  -- ^ Number of elements in the bit set.
+                          , _bits :: !c    -- ^ Bit container.
                           }
     deriving Typeable
 
@@ -135,12 +135,12 @@ size = _n
 {-# INLINE size #-}
 
 -- | /O(d)/. Ask whether the item is in the bit set.
-member :: a -> GBitSet c a -> Bool
-member x (BitSet { _bits }) = _bits `testBit` fromEnum x
+member :: (Enum a , Bits c) => a -> GBitSet c a -> Bool
+member x = (`testBit` fromEnum x) . _bits
 {-# INLINE member #-}
 
 -- | /O(d)/. Ask whether the item is in the bit set.
-notMember :: a -> GBitSet c a -> Bool
+notMember :: (Enum a, Bits c) => a -> GBitSet c a -> Bool
 notMember x = not . member x
 {-# INLINE notMember #-}
 
@@ -180,7 +180,6 @@ delete x bs@(BitSet { _bits }) =
 union :: GBitSet c a -> GBitSet c a -> GBitSet c a
 union (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
     let b = b1 .|. b2 in BitSet { _n = popCount b, _bits = b }
-
 {-# INLINE union #-}
 
 -- | /O(max(m, n))/. The union of a list of bit sets.
@@ -223,7 +222,7 @@ toList = Foldable.toList
 -- | /O(d * n)/. Make a bit set from a list of elements.
 fromList :: (Enum a, Bits c, Num c) => [a] -> GBitSet c a
 fromList xs = BitSet { _n = popCount b, _bits = b } where
-  b = List.foldl' (\i x -> setBit i (fromEnum x)) 0 xs
+  b = List.foldl' (\i x -> i `setBit` fromEnum x) 0 xs
 {-# INLINE fromList #-}
 
 -- | /O(1)/. Internal function, which extracts the underlying container

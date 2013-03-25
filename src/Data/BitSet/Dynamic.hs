@@ -100,19 +100,26 @@ instance Bits FasterInteger where
     complement = FasterInteger . complement . unFI
     {-# INLINE complement #-}
 
-    shift (FasterInteger x) i = FasterInteger $ shift x i
+    shift (FasterInteger x) = FasterInteger . shift x
     {-# INLINE shift #-}
 
-    rotate (FasterInteger x) i = FasterInteger $ rotate x i
+    rotate (FasterInteger x) = FasterInteger . rotate x
     {-# INLINE rotate #-}
 
     bit = FasterInteger . bit
     {-# INLINE bit #-}
 
     testBit (FasterInteger x) i = testBitInteger x i
-    {-# INLINE testBit #-}
+    {-# SPECIALIZE INLINE [1] testBit :: FasterInteger -> Int -> Bool #-}
+
+    setBit (FasterInteger x) i = FasterInteger $ setBit x i
+    {-# SPECIALIZE INLINE setBit :: FasterInteger -> Int -> FasterInteger #-}
+
+    clearBit (FasterInteger x) i = FasterInteger $ clearBit x i
+    {-# SPECIALIZE INLINE clearBit :: FasterInteger -> Int -> FasterInteger #-}
 
     popCount (FasterInteger x) = I# (word2Int# (popCountInteger x))
+    {-# SPECIALIZE INLINE popCount :: FasterInteger -> Int #-}
 
     bitSize = bitSize . unFI
     {-# INLINE bitSize #-}
@@ -133,12 +140,12 @@ size = BS.size
 {-# INLINE size #-}
 
 -- | /O(1)/. Ask whether the item is in the bit set.
-member :: a -> BitSet a -> Bool
+member :: Enum a => a -> BitSet a -> Bool
 member = BS.member
 {-# INLINE member #-}
 
 -- | /O(1)/. Ask whether the item is in the bit set.
-notMember :: a -> BitSet a -> Bool
+notMember :: Enum a => a -> BitSet a -> Bool
 notMember = BS.notMember
 {-# INLINE notMember #-}
 
