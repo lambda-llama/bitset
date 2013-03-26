@@ -25,6 +25,7 @@
 -- independent of container choice, the maximum number of elements in a
 -- bit set is bounded by @maxBound :: Int@.
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE BangPatterns #-}
@@ -123,7 +124,9 @@ instance NFData c => NFData (GBitSet c a) where
     rnf (BitSet { _n, _bits }) = rnf _n `seq` rnf _bits `seq` ()
 
 instance Num c => Foldable.Foldable (GBitSet c) where
+#if MIN_VERSION_base(4, 6, 0)
     foldl' = foldl'
+#endif
     foldr  = foldr
 
     foldMap f (BitSet { _n, _bits }) = go _n 0 where
