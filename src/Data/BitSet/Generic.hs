@@ -28,7 +28,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE ImpredicativeTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -127,10 +126,12 @@ instance NFData c => NFData (GBitSet c a) where
     rnf (BitSet { _n, _bits }) = rnf _n `seq` rnf _bits `seq` ()
 
 instance (Bits c, Enum a, Num c, Storable c) => Storable (GBitSet c a) where
-    sizeOf _ = sizeOf (undefined :: c)
-    alignment _ = alignment (undefined :: c)
-    peek ptr = fmap unsafeFromBits $ peek $ castPtr ptr
-    poke ptr BitSet { _bits } = poke (castPtr ptr) _bits
+    sizeOf = sizeOf . _bits
+    alignment = alignment . _bits
+    peek ptr = do
+        b <- peek $ castPtr ptr
+        return $! BitSet (popCount b) b
+    poke ptr = poke (castPtr ptr) . _bits
 
 instance Num c => Foldable.Foldable (GBitSet c) where
 #if MIN_VERSION_base(4, 6, 0)
