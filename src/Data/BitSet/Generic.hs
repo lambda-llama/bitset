@@ -94,10 +94,11 @@ import qualified Data.Foldable as Foldable
 import qualified Data.List as List
 
 -- | A bit set with unspecified container type.
-data GBitSet c a = (Enum a, Bits c, Num c) =>
-                   BitSet { _n    :: !Int  -- ^ Number of elements in the bit set.
-                          , _bits :: !c    -- ^ Bit container.
-                          }
+data GBitSet c a =
+    (Enum a, Bits c, Num c) =>
+    BitSet { _n    :: {-# UNPACK #-} !Int  -- ^ Number of elements in the bit set.
+           , _bits :: !c                   -- ^ Bit container.
+           }
     deriving Typeable
 
 instance Eq (GBitSet c a) where
