@@ -60,6 +60,10 @@ module Data.BitSet.Dynamic
     -- * Transformations
     , map
 
+    -- * Folds
+    , foldl'
+    , foldr
+
     -- * Filter
     , filter
 
@@ -68,7 +72,7 @@ module Data.BitSet.Dynamic
     , fromList
     ) where
 
-import Prelude hiding (null, map, filter)
+import Prelude hiding (null, map, filter, foldr)
 
 import Data.Bits (Bits(..))
 import GHC.Base (Int(..), divInt#, modInt#)
@@ -112,7 +116,7 @@ instance Bits FasterInteger where
     testBit (FasterInteger x) i = testBitInteger x i
     {-# SPECIALIZE INLINE [1] testBit :: FasterInteger -> Int -> Bool #-}
 
-    setBit (FasterInteger x) i = FasterInteger $ setBit x i
+    setBit (FasterInteger x) = FasterInteger . setBit x
     {-# SPECIALIZE INLINE setBit :: FasterInteger -> Int -> FasterInteger #-}
 
     clearBit (FasterInteger x) = FasterInteger . clearBit x
@@ -206,15 +210,32 @@ intersection = BS.intersection
 -- Resulting bit set may be smaller then the original.
 map :: (Enum a, Enum b) => (a -> b) -> BitSet a -> BitSet b
 map = BS.map
+{-# INLINE map #-}
+
+-- | /O(n)/ Reduce this bit set by applying a binary function to all
+-- elements, using the given starting value.  Each application of the
+-- operator is evaluated before before using the result in the next
+-- application.  This function is strict in the starting value.
+foldl' :: (b -> a -> b) -> b -> BitSet a -> b
+foldl' = BS.foldl'
+{-# INLINE foldl' #-}
+
+-- | /O(n)/ Reduce this bit set by applying a binary function to all
+-- elements, using the given starting value.
+foldr :: (a -> b -> b) -> b -> BitSet a -> b
+foldr = BS.foldr
+{-# INLINE foldr #-}
 
 -- | /O(n)/ Filter this bit set by retaining only elements satisfying a
 -- predicate.
 filter :: Enum a => (a -> Bool) -> BitSet a -> BitSet a
 filter = BS.filter
+{-# INLINE filter #-}
 
 -- | /O(n)/. Convert the bit set set to a list of elements.
 toList :: BitSet a -> [a]
 toList = BS.toList
+{-# INLINE toList #-}
 
 -- | /O(n)/. Make a bit set from a list of elements.
 fromList :: Enum a => [a] -> BitSet a

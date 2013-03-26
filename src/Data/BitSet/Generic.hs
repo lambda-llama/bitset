@@ -62,6 +62,10 @@ module Data.BitSet.Generic
     -- * Transformations
     , map
 
+    -- * Folds
+    , foldl'
+    , foldr
+
     -- * Filter
     , filter
 
@@ -74,7 +78,7 @@ module Data.BitSet.Generic
     , unsafeFromBits
     ) where
 
-import Prelude hiding (null, map, filter)
+import Prelude hiding (null, map, filter, foldr)
 
 import Control.Applicative ((<$>))
 import Control.DeepSeq (NFData(..))
@@ -83,6 +87,7 @@ import Data.Bits (Bits, (.|.), (.&.), complement, bit,
 import Data.Data (Typeable)
 import Data.Function (on)
 import Data.Monoid (Monoid(..), (<>))
+import GHC.Exts (build)
 import Text.Read (Read(..), Lexeme(..), lexP, prec, parens)
 import qualified Data.Foldable as Foldable
 import qualified Data.List as List
@@ -118,6 +123,9 @@ instance NFData c => NFData (GBitSet c a) where
     rnf (BitSet { _n, _bits }) = rnf _n `seq` rnf _bits `seq` ()
 
 instance Num c => Foldable.Foldable (GBitSet c) where
+    foldl' = foldl'
+    foldr  = foldr
+
     foldMap f (BitSet { _n, _bits }) = go _n 0 where
         go 0 _b = mempty
         go !n b = if _bits `testBit` b
@@ -206,18 +214,43 @@ intersection (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
 {-# INLINE intersection #-}
 
 -- | /O(d * n)/ Transform this bit set by applying a function to every
--- value. Resulting bit set may be smaller then the original.
+-- value.  Resulting bit set may be smaller then the original.
 map :: (Enum a, Enum b, Bits c, Num c) => (a -> b) -> GBitSet c a -> GBitSet c b
 map f = fromList . List.map f . toList
+{-# INLINE map #-}
+
+-- | /O(d * n)/ Reduce this bit set by applying a binary function to all
+-- elements, using the given starting value.  Each application of the
+-- operator is evaluated before before using the result in the next
+-- application.  This function is strict in the starting value.
+foldl' :: (b -> a -> b) -> b -> GBitSet c a -> b
+foldl' f acc0  (BitSet { _n, _bits }) = go acc0 _n 0 where
+  go !acc 0 _b = acc
+  go !acc !n b = if _bits `testBit` b
+                 then go (f acc $ toEnum b) (pred n) (succ b)
+                 else go acc n (succ b)
+{-# INLINE foldl' #-}
+
+-- | /O(d * n)/ Reduce this bit set by applying a binary function to
+-- all elements, using the given starting value.
+foldr :: (a -> b -> b) -> b -> GBitSet c a -> b
+foldr f acc0 (BitSet { _n, _bits }) = go _n 0 where
+  go 0 _b = acc0
+  go !n b = if _bits `testBit` b
+            then toEnum b `f` go (pred n) (succ b)
+            else go n (succ b)
+{-# INLINE foldr #-}
 
 -- | /O(d * n)/ Filter this bit set by retaining only elements satisfying
 -- predicate.
 filter :: (Enum a, Bits c, Num c) => (a -> Bool) -> GBitSet c a -> GBitSet c a
 filter f = fromList . List.filter f . toList
+{-# INLINE filter #-}
 
 -- | /O(d * n)/. Convert this bit set set to a list of elements.
 toList :: Num c => GBitSet c a -> [a]
-toList = Foldable.toList
+toList bs = build (\f acc -> foldr f acc bs)
+{-# INLINE toList #-}
 
 -- | /O(d * n)/. Make a bit set from a list of elements.
 fromList :: (Enum a, Bits c, Num c) => [a] -> GBitSet c a

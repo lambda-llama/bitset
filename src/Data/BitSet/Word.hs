@@ -28,6 +28,10 @@ module Data.BitSet.Word
     -- * Transformations
     , map
 
+    -- * Folds
+    , foldl'
+    , foldr
+
     -- * Filter
     , filter
 
@@ -36,7 +40,7 @@ module Data.BitSet.Word
     , fromList
     ) where
 
-import Prelude hiding (null, map, filter)
+import Prelude hiding (null, map, filter, foldr)
 
 import Data.Word (Word)
 
@@ -122,6 +126,20 @@ intersection = BS.intersection
 -- Resulting bit set may be smaller then the original.
 map :: (Enum a, Enum b) => (a -> b) -> BitSet a -> BitSet b
 map = BS.map
+
+-- | /O(n)/ Reduce this bit set by applying a binary function to all
+-- elements, using the given starting value.  Each application of the
+-- operator is evaluated before before using the result in the next
+-- application.  This function is strict in the starting value.
+foldl' :: (b -> a -> b) -> b -> BitSet a -> b
+foldl' = BS.foldl'
+{-# INLINE foldl' #-}
+
+-- | /O(n)/ Reduce this bit set by applying a binary function to all
+-- elements, using the given starting value.
+foldr :: (a -> b -> b) -> b -> BitSet a -> b
+foldr = BS.foldr
+{-# INLINE foldr #-}
 
 -- | /O(n)/ Filter this bit set by retaining only elements satisfying a
 -- predicate.
