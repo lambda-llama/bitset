@@ -28,6 +28,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE ImpredicativeTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -88,6 +89,7 @@ import Data.Bits (Bits, (.|.), (.&.), complement, bit,
 import Data.Data (Typeable)
 import Data.Function (on)
 import Data.Monoid (Monoid(..), (<>))
+import Foreign (Storable(..), castPtr)
 import GHC.Exts (build)
 import Text.Read (Read(..), Lexeme(..), lexP, prec, parens)
 import qualified Data.Foldable as Foldable
@@ -123,6 +125,12 @@ instance (Enum a, Bits c, Num c) => Monoid (GBitSet c a) where
 
 instance NFData c => NFData (GBitSet c a) where
     rnf (BitSet { _n, _bits }) = rnf _n `seq` rnf _bits `seq` ()
+
+instance (Bits c, Enum a, Num c, Storable c) => Storable (GBitSet c a) where
+    sizeOf _ = sizeOf (undefined :: c)
+    alignment _ = alignment (undefined :: c)
+    peek ptr = fmap unsafeFromBits $ peek $ castPtr ptr
+    poke ptr BitSet { _bits } = poke (castPtr ptr) _bits
 
 instance Num c => Foldable.Foldable (GBitSet c) where
 #if MIN_VERSION_base(4, 6, 0)

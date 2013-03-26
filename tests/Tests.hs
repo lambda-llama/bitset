@@ -7,16 +7,23 @@ import Control.Applicative ((<$>))
 import Data.List ((\\), intersect, union, nub, sort)
 import Data.Monoid ((<>), mempty)
 import Data.Word (Word16)
+import Foreign (Storable(..), allocaBytes)
 
 import Test.Framework (Test, defaultMain)
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.QuickCheck (Property, Arbitrary(..), (==>), classify)
+import Test.QuickCheck.Monadic (monadicIO, assert, run)
 
 import Data.BitSet (BitSet)
+import Data.BitSet.Generic (GBitSet)
 import qualified Data.BitSet as BS
+import qualified Data.BitSet.Generic as GS
 
 instance (Arbitrary a, Enum a) => Arbitrary (BitSet a) where
     arbitrary = BS.fromList <$> arbitrary
+
+instance (Arbitrary a, Enum a) => Arbitrary (GBitSet Word16 a) where
+    arbitrary = GS.fromList <$> arbitrary
 
 instance Show (Word16 -> a) where
     show = const "FUNCTION"
@@ -158,6 +165,16 @@ propMap bs f = BS.map f bs == (BS.fromList $ map f $ BS.toList bs)
 propFilter :: BitSet Word16 -> (Word16 -> Bool) -> Bool
 propFilter bs f = BS.filter f bs == (BS.fromList $ filter f $ BS.toList bs)
 
+propStorable :: GBitSet Word16 Word16 -> Property
+propStorable storable = monadicIO $ do
+    peeked <- run $ do
+        allocaBytes size $ \ptr -> do
+            poke ptr storable
+            peek ptr
+    assert $ storable == peeked
+  where
+    size = sizeOf storable
+
 main :: IO ()
 main = defaultMain tests where
   tests :: [Test]
@@ -183,4 +200,5 @@ main = defaultMain tests where
           , testProperty "show read" propShowRead
           , testProperty "map" propMap
           , testProperty "filter" propFilter
+          , testProperty "storable instance" propStorable
           ]
