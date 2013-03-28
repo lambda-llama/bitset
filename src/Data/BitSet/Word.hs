@@ -73,10 +73,12 @@ notMember = GS.notMember
 -- @s1@ is a subset of @s2@.
 isSubsetOf :: BitSet a -> BitSet a -> Bool
 isSubsetOf = GS.isSubsetOf
+{-# INLINE isSubsetOf #-}
 
 -- | /O(max(n, m)/. Is this a proper subset? (ie. a subset but not equal).
 isProperSubsetOf :: BitSet a -> BitSet a -> Bool
 isProperSubsetOf = GS.isProperSubsetOf
+{-# INLINE isProperSubsetOf #-}
 
 -- | The empty bit set.
 empty :: Enum a => BitSet a
@@ -145,10 +147,12 @@ foldr = GS.foldr
 -- predicate.
 filter :: Enum a => (a -> Bool) -> BitSet a -> BitSet a
 filter = GS.filter
+{-# INLINE filter #-}
 
 -- | /O(n)/. Convert the bit set set to a list of elements.
 toList :: BitSet a -> [a]
 toList = GS.toList
+{-# INLINE toList #-}
 
 -- | /O(n)/. Make a bit set from a list of elements.
 fromList :: Enum a => [a] -> BitSet a

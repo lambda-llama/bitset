@@ -13,7 +13,7 @@
 -- Stability   :  experimental
 -- Portability :  GHC
 --
--- A space-efficient implementation of set data structure enumerated
+-- A space-efficient implementation of set data structure for enumerated
 -- data types.
 --
 -- /Note/: Read below the synopsis for important notes on the use of
@@ -156,10 +156,12 @@ notMember = GS.notMember
 -- @s1@ is a subset of @s2@.
 isSubsetOf :: BitSet a -> BitSet a -> Bool
 isSubsetOf = GS.isSubsetOf
+{-# INLINE isSubsetOf #-}
 
 -- | /O(max(n, m)/. Is this a proper subset? (ie. a subset but not equal).
 isProperSubsetOf :: BitSet a -> BitSet a -> Bool
 isProperSubsetOf = GS.isProperSubsetOf
+{-# INLINE isProperSubsetOf #-}
 
 -- | The empty bit set.
 empty :: Enum a => BitSet a

@@ -20,7 +20,7 @@
 -- > import Data.BitSet.Generic (BitSet)
 -- > import qualified Data.BitSet.Generic as BS
 --
--- The implementation is abstract with respect to conatiner type, so any
+-- The implementation is abstract with respect to container type, so any
 -- numeric type with 'Bits' instance can be used as a container. However,
 -- independent of container choice, the maximum number of elements in a
 -- bit set is bounded by @maxBound :: Int@.
@@ -169,10 +169,12 @@ notMember x = not . member x
 isSubsetOf :: GBitSet c a -> GBitSet c a -> Bool
 isSubsetOf (BitSet { _n = n1, _bits = b1 }) (BitSet { _n = n2, _bits = b2 }) =
     n2 >= n1 && b2 .|. b1 == b2
+{-# INLINE isSubsetOf #-}
 
 -- | /O(max(n, m)/. Is this a proper subset? (ie. a subset but not equal).
 isProperSubsetOf :: Eq c => GBitSet c a -> GBitSet c a -> Bool
 isProperSubsetOf bs1 bs2 = bs1 `isSubsetOf` bs2 && bs1 /= bs2
+{-# INLINE isProperSubsetOf #-}
 
 -- | The empty bit set.
 empty :: (Enum a, Bits c, Num c) => GBitSet c a
