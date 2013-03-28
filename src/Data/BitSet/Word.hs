@@ -28,6 +28,7 @@ module Data.BitSet.Word
     (
     -- * Bit set type
       BitSet
+
     -- * Operators
     , (\\)
 
