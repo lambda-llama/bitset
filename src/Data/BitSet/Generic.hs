@@ -55,7 +55,6 @@ module Data.BitSet.Generic
 
     -- * Combine
     , union
-    , unions
     , difference
     , intersection
 
@@ -119,7 +118,6 @@ instance (Show a, Num c) => Show (GBitSet c a) where
 instance (Enum a, Bits c, Num c) => Monoid (GBitSet c a) where
     mempty  = empty
     mappend = union
-    mconcat = unions
 
 instance NFData c => NFData (GBitSet c a) where
     rnf (BitSet { _n, _bits }) = rnf _n `seq` rnf _bits `seq` ()
@@ -203,11 +201,6 @@ union :: GBitSet c a -> GBitSet c a -> GBitSet c a
 union (BitSet { _bits = b1 }) (BitSet { _bits = b2 }) =
     let b = b1 .|. b2 in BitSet { _n = popCount b, _bits = b }
 {-# INLINE union #-}
-
--- | /O(max(m, n))/. The union of a list of bit sets.
-unions :: (Enum a, Bits c, Num c) => [GBitSet c a] -> GBitSet c a
-unions = List.foldl' union empty
-{-# INLINE unions #-}
 
 -- | /O(max(m, n))/. Difference of two bit sets.
 difference :: GBitSet c a -> GBitSet c a -> GBitSet c a

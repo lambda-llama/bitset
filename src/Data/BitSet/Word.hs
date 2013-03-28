@@ -1,3 +1,29 @@
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.BitSet.Word
+-- Copyright   :  (c) Sergei Lebedev, Aleksey Kladov, Fedor Gogolev 2013
+--                Based on Data.BitSet (c) Denis Bueno 2008-2009
+-- License     :  MIT
+-- Maintainer  :  superbobry@gmail.com
+-- Stability   :  experimental
+-- Portability :  GHC
+--
+-- A space-efficient implementation of set data structure for enumerated
+-- data types.
+--
+-- /Note/: Read below the synopsis for important notes on the use of
+-- this module.
+--
+-- This module is intended to be imported @qualified@, to avoid name
+-- clashes with "Prelude" functions, e.g.
+--
+-- > import Data.BitSet.Word (BitSet)
+-- > import qualified Data.BitSet.Word as BS
+--
+-- The implementation uses 'Word' as underlying container, thus the
+-- maximum number of elements you can store in this bit set is bounded
+-- by @sizeOf (undefined :: Word)@.
+
 module Data.BitSet.Word
     (
     -- * Bit set type
@@ -21,7 +47,6 @@ module Data.BitSet.Word
 
     -- * Combine
     , union
-    , unions
     , difference
     , intersection
 
@@ -100,26 +125,21 @@ delete :: a -> BitSet a -> BitSet a
 delete = GS.delete
 {-# INLINE delete #-}
 
--- | /O(max(m, n))/. The union of two bit sets.
+-- | /O(1)/. The union of two bit sets.
 union :: BitSet a -> BitSet a -> BitSet a
 union = GS.union
 {-# INLINE union #-}
 
--- | /O(max(m, n))/. The union of a list of bit sets.
-unions :: Enum a => [BitSet a] -> BitSet a
-unions = GS.unions
-{-# INLINE unions #-}
-
--- | /O(max(m, n))/. Difference of two bit sets.
+-- | /O(1)/. Difference of two bit sets.
 difference :: BitSet a -> BitSet a -> BitSet a
 difference = GS.difference
 {-# INLINE difference #-}
 
--- | /O(max(m, n))/. See `difference'.
+-- | /O(1)/. See `difference'.
 (\\) :: BitSet a -> BitSet a -> BitSet a
 (\\) = difference
 
--- | /O(max(m, n))/. The intersection of two bit sets.
+-- | /O(1)/. The intersection of two bit sets.
 intersection :: BitSet a -> BitSet a -> BitSet a
 intersection = GS.intersection
 {-# INLINE intersection #-}

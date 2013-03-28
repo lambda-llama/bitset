@@ -80,14 +80,6 @@ propFromList xs = all (`BS.member` bs) xs where
 propEmpty :: Word16 -> Bool
 propEmpty x = x `BS.notMember` BS.empty
 
-propUnions :: [Word16] -> Bool
-propUnions xs = all (`BS.member` bs) xs where
-  n      = length xs
-  (l, r) = splitAt (n `div` 2) xs
-
-  bs :: BitSet Word16
-  bs = BS.unions $ map BS.fromList [l, r, l, r, l]
-
 propIntersectionWithSelf :: [Word16] -> Bool
 propIntersectionWithSelf xs = all (`BS.member` bs) xs
   where
@@ -189,7 +181,6 @@ main = defaultMain tests where
           , testProperty "toList" propToList
           , testProperty "fromList" propFromList
           , testProperty "empty" propEmpty
-          , testProperty "unions" propUnions
           , testProperty "intersection with self" propIntersectionWithSelf
           , testProperty "intersection" propIntersection
           , testProperty "difference with self" propDifferenceWithSelf

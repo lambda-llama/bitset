@@ -52,7 +52,6 @@ module Data.BitSet.Dynamic
 
     -- * Combine
     , union
-    , unions
     , difference
     , intersection
 
@@ -188,21 +187,16 @@ union :: BitSet a -> BitSet a -> BitSet a
 union = GS.union
 {-# INLINE union #-}
 
--- | /O(max(m, n))/. The union of a list of bit sets.
-unions :: Enum a => [BitSet a] -> BitSet a
-unions = GS.unions
-{-# INLINE unions #-}
-
--- | /O(max(m, n))/. Difference of two bit sets.
+-- | /O(1)/. Difference of two bit sets.
 difference :: BitSet a -> BitSet a -> BitSet a
 difference = GS.difference
 {-# INLINE difference #-}
 
--- | /O(max(m, n))/. See `difference'.
+-- | /O(1)/. See `difference'.
 (\\) :: BitSet a -> BitSet a -> BitSet a
 (\\) = difference
 
--- | /O(max(m, n))/. The intersection of two bit sets.
+-- | /O(1)/. The intersection of two bit sets.
 intersection :: BitSet a -> BitSet a -> BitSet a
 intersection = GS.intersection
 {-# INLINE intersection #-}
