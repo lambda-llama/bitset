@@ -3,6 +3,29 @@ bitset Changelog
 
 Here you can see the full list of changes between each bitset release.
 
+Version 1.4
+-----------
+
+Released on March 29th, 2013
+
+- More speed optimizations, 'Data.BitSet.Dynamic' is close to 'Data.Set'
+  performance on most operations.
+- Added 'Data.BitSet.Word', a bit set with native integer as container
+  type, significantly faster then 'Data.Set' for enumerated types with
+  small number of constructors.
+- Added folds, 'map' and 'filter' for consistency with other Haskell
+  containers.
+
+Version 1.3
+-----------
+
+Released on March 25th, 2013
+
+- Added a generic bit set data type, abstract with respect to the underlying
+  container.
+- Improved dynamic bit set performance via optimized 'popCount' and
+  'testBit' functions.
+
 Version 1.2
 -----------
 
