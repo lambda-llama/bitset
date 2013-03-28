@@ -95,13 +95,13 @@ notMember :: Enum a => a -> BitSet a -> Bool
 notMember = GS.notMember
 {-# INLINE notMember #-}
 
--- | /O(max(n, m))/. Is this a subset? (@s1 isSubsetOf s2@) tells whether
+-- | /O(1)/. Is this a subset? (@s1 isSubsetOf s2@) tells whether
 -- @s1@ is a subset of @s2@.
 isSubsetOf :: BitSet a -> BitSet a -> Bool
 isSubsetOf = GS.isSubsetOf
 {-# INLINE isSubsetOf #-}
 
--- | /O(max(n, m)/. Is this a proper subset? (ie. a subset but not equal).
+-- | /O(1)/. Is this a proper subset? (ie. a subset but not equal).
 isProperSubsetOf :: BitSet a -> BitSet a -> Bool
 isProperSubsetOf = GS.isProperSubsetOf
 {-# INLINE isProperSubsetOf #-}
