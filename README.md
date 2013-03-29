@@ -26,12 +26,11 @@ main = print $ bs \\ BitSet.singleton Blue where
 Benchmarks
 ----------
 
-To run [benchmarks] [benchmarks], create a separate `cabal-dev` environment
-in `benchmarks/` directory and:
+To run [benchmarks] [benchmarks], configure `cabal` with benchmarks
+and build:
 
 ```bash
-$ cd ./benchmarks
-$ cabal-dev install-deps && cabal-dev build
+$ cabal-dev install-deps --enable-benchmarks && cabal-dev build
 $ ./dist/build/bitset-benchmarks/bitset-benchmarks -o dist/bench.html
 ```
 
