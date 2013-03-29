@@ -79,7 +79,7 @@ import GHC.Base (Int(..), divInt#, modInt#)
 import GHC.Exts (popCnt#)
 import GHC.Integer.GMP.Internals (Integer(..))
 import GHC.Prim (State#, RealWorld, Int#, Word#, ByteArray#,
-                 (+#), (==#), (>=#), (<#),
+                 (+#), (==#), (>=#), (<#), negateInt#,
                  word2Int#, int2Word#, plusWord#, realWorld#,
                  newByteArray#, copyByteArray#, writeWordArray#,
                  indexWordArray#, unsafeFreezeByteArray#, sizeofByteArray#)
@@ -262,15 +262,14 @@ divModInt# x y = (# d, m #) where
   !m = x `modInt#` y
 {-# INLINE divModInt# #-}
 
--- FIXME(superbobry): do we need to handle negative 's#' in teh code
--- bellow? turns it's actually a _signed_ size of 'Integer', so for
--- example '-1 :: Integer' will be represented as (J# -1 [1]).
+abs# :: Int# -> Int#
+abs# x = if x <# 0# then negateInt# x else x
+{-# INLINE abs# #-}
 
--- Note(superbobry): this will be irrelevant after the new GHC release.
 testBitInteger :: Integer -> Int -> Bool
 testBitInteger (S# i#) b = I# i# `testBit` b
 testBitInteger (J# s# d#) (I# b#) =
-    if b# <# 0# || block# >=# s#
+    if b# <# 0# || block# >=# abs# s#
     then False
     else W# (indexWordArray# d# block#) `testBit` I# offset#
   where
@@ -280,7 +279,7 @@ testBitInteger (J# s# d#) (I# b#) =
 clearBitInteger :: Integer -> Int -> Integer
 clearBitInteger (S# i#) b = S# i# `clearBit` b
 clearBitInteger i@(J# s# d0#) (I# b#) =
-    if b# <# 0# || block# >=# s#
+    if b# <# 0# || block# >=# abs# s#
     then i
     else J# s# (go realWorld#)
   where
