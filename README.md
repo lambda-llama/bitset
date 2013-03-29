@@ -23,6 +23,27 @@ main = print $ bs \\ BitSet.singleton Blue where
   bs = BitSet.fromList [Red, Green, Blue]
 ```
 
+The API is exactly the same for a static bitset, based on native `Word`.
+Here's an example from [`hen`] [hen] library, which uses `Data.BitSet` to
+store Xen domain status flags:
+
+```haskell
+import qualified Data.BitSet.Word as BS
+
+data DomainFlag = Dying
+                | Crashed
+                | Shutdown
+                | Paused
+                | Blocked
+                | Running
+                | HVM
+                | Debugged
+    deriving (Enum, Show)
+
+isAlive :: DomainFlag -> Bool
+isAlive = not . BS.null . BS.intersect (BS.fromList [Crashed, Shutdown])
+```
+
 Benchmarks
 ----------
 
@@ -37,3 +58,4 @@ $ ./dist/build/bitset-benchmarks/bitset-benchmarks -o dist/bench.html
 [travis]: http://travis-ci.org/superbobry/bitset
 [travis-img]: https://secure.travis-ci.org/superbobry/bitset.png
 [benchmarks]: http://superbobry.github.com/bitset/
+[hen]: https://github.com/selectel/hen/

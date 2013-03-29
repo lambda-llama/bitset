@@ -22,7 +22,9 @@
 --
 -- The implementation uses 'Word' as underlying container, thus the
 -- maximum number of elements you can store in this bit set is bounded
--- by @sizeOf (undefined :: Word)@.
+-- by the number of bits in 'Word' data type. However, due to native bitwise
+-- operations "Data.BitSet.Word" is significantly faster then "Data.Set"
+-- on all operations.
 
 module Data.BitSet.Word
     (
