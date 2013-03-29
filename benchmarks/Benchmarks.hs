@@ -66,7 +66,7 @@ main = do
         ]
   where
     n :: Int
-    n = 128
+    n = 4096
 
     elems1 = [1..n]
     elems2 = [1..n `div` 2]
