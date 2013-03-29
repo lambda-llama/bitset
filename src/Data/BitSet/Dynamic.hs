@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE MagicHash #-}
+{-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
@@ -77,8 +78,11 @@ import Data.Bits (Bits(..))
 import GHC.Base (Int(..), divInt#, modInt#)
 import GHC.Exts (popCnt#)
 import GHC.Integer.GMP.Internals (Integer(..))
-import GHC.Prim (Int#, Word#, (+#), (==#), (>=#),
-                 word2Int#, int2Word#, plusWord#, indexWordArray#)
+import GHC.Prim (State#, RealWorld, Int#, Word#, ByteArray#,
+                 (+#), (==#), (>=#),
+                 word2Int#, int2Word#, plusWord#, realWorld#,
+                 newByteArray#, copyByteArray#, writeWordArray#,
+                 indexWordArray#, unsafeFreezeByteArray#)
 import GHC.Word (Word(..))
 
 import Control.DeepSeq (NFData(..))
@@ -252,6 +256,10 @@ popCountInteger (J# s# d#) = go 0# (int2Word# 0#) where
 #error WORD_SIZE_IN_BITS not defined!
 #endif
 
+-- FIXME(superbobry): do we need to handle negative 's#' in teh code
+-- bellow? turns it's actually a _signed_ size of 'Integer', so for
+-- example '-1 :: Integer' will be represented as (J# -1 [1]).
+
 -- Note(superbobry): this will be irrelevant after the new GHC release.
 testBitInteger :: Integer -> Int -> Bool
 testBitInteger (S# i#) b = I# i# `testBit` b
@@ -260,12 +268,28 @@ testBitInteger (J# s# d#) (I# b#) =
     then False
     else W# (indexWordArray# d# block#) `testBit` I# offset#
   where
-    n# :: Int#
-    n# = WORD_SIZE_IN_BITS#
-
     block# :: Int#
-    !block# = b# `divInt#` n#
+    !block# = b# `divInt#` WORD_SIZE_IN_BITS#
 
     offset# :: Int#
-    !offset# = b# `modInt#` n#
+    !offset# = b# `modInt#` WORD_SIZE_IN_BITS#
 {-# INLINE testBitInteger #-}
+
+clearBitInteger :: Integer -> Int -> Integer
+clearBitInteger (S# i#) b = S# i# `clearBit` b
+clearBitInteger (J# s# d0#) (I# b#) = J# s# (go realWorld#) where
+  go :: State# RealWorld -> ByteArray#
+  go state0 =
+      let (# state1, d1 #) = newByteArray# s# state0
+          !state2 = copyByteArray# d0# 0# d1 0# s# state1
+          !(W# chunk) = W# (indexWordArray# d0# block#) `clearBit` I# offset#
+          !state3 = writeWordArray# d1 block# chunk state2
+          (# _state4, d2 #) = unsafeFreezeByteArray# d1 state3
+      in d2
+
+  block# :: Int#
+  !block# = b# `divInt#` WORD_SIZE_IN_BITS#
+
+  offset# :: Int#
+  !offset# = b# `modInt#` WORD_SIZE_IN_BITS#
+{-# INLINE clearBitInteger #-}
