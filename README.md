@@ -55,7 +55,7 @@ $ cabal-dev install-deps --enable-benchmarks && cabal-dev build
 $ ./dist/build/bitset-benchmarks/bitset-benchmarks -o dist/bench.html
 ```
 
-[travis]: http://travis-ci.org/superbobry/bitset
-[travis-img]: https://secure.travis-ci.org/superbobry/bitset.png
-[benchmarks]: http://superbobry.github.com/bitset/
+[travis]: http://travis-ci.org/lambda-llama/bitset
+[travis-img]: https://secure.travis-ci.org/lambda-llama/bitset.png
+[benchmarks]: http://lambda-llama.github.com/bitset/
 [hen]: https://github.com/selectel/hen/
