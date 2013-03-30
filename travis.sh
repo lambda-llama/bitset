@@ -12,7 +12,7 @@ cabal configure
 cabal install hscolour
 cabal haddock --hyperlink-source --html-location='http://hackage.haskell.org/packages/archive/$pkg/$version/doc/html'
 
-# exec > /dev/null 2>&1
+exec > /dev/null 2>&1
 
 git config --global user.name "Travis CI"
 git config --global user.email "ci+bitset@knsd.net"
