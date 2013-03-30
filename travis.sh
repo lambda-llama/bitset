@@ -6,7 +6,7 @@ cabal configure --enable-tests --enable-benchmarks
 cabal build
 cabal test
 
-cabal bench --benchmark-option='--output=$benchmark.html'
+cabal bench --benchmark-option='--output=index.html'
 
 cabal configure
 cabal install hscolour
@@ -17,13 +17,13 @@ exec > /dev/null 2>&1
 git config --global user.name "Travis CI"
 git config --global user.email "ci+bitset@knsd.net"
 
-git clone https://${GH_TOKEN}@github.com/superbobry/bitset.git
+git clone https://${GH_TOKEN}@github.com/lambda-llama/bitset.git
 
 cd bitset
 git checkout -b gh-pages origin/gh-pages
 
 rm -f index.html
-mv ../*.html index.html
+mv ../index.html index.html
 git add index.html
 
 rm -rf docs
