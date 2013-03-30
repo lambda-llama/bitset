@@ -22,9 +22,8 @@ git clone https://${GH_TOKEN}@github.com/lambda-llama/bitset.git
 cd bitset
 git checkout -b gh-pages origin/gh-pages
 
-rm -f index.html
-mv ../index.html index.html
-git add index.html
+mv ../index.html benchmarks/index.html
+git add benchmarks
 
 rm -rf docs
 mv ../dist/doc/html/bitset docs

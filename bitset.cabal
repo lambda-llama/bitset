@@ -53,7 +53,7 @@ Test-suite bitset-tests
 
 Benchmark bitset-benchmarks
   Hs-source-dirs:     src benchmarks
-  Ghc-options:        -Wall -O2 -optc-O3 -optc-msse4.1 -fno-warn-orphans
+  Ghc-options:        -Wall -fno-warn-orphans -O2 -optc-O3 -optc-msse4.1
   Default-language:   Haskell2010
 
   Type:               exitcode-stdio-1.0
