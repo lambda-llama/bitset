@@ -12,7 +12,7 @@ Author:               Sergei Lebedev <superbobry@gmail.com>
                     , Aleksey Kladov <aleksey.kladov@gmail.com>
                     , Fedor Gogolev <knsd@knsd.net>
 Maintainer:           superbobry@gmail.com
-Bug-reports:          http://github.com/superbobry/bitset/issues
+Bug-reports:          http://github.com/lambda-llama/bitset/issues
 Stability:            Experimental
 Cabal-Version:        >= 1.12
 Build-type:           Simple
@@ -20,7 +20,7 @@ Tested-with:          GHC >= 7.4.2
 
 Source-repository head
   Type:     git
-  Location: https://github.com/superbobry/bitset
+  Location: https://github.com/lambda-llama/bitset
 
 Library
   Hs-source-dirs:     src
