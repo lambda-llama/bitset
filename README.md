@@ -57,5 +57,5 @@ $ ./dist/build/bitset-benchmarks/bitset-benchmarks -o dist/bench.html
 
 [travis]: http://travis-ci.org/lambda-llama/bitset
 [travis-img]: https://secure.travis-ci.org/lambda-llama/bitset.png
-[benchmarks]: http://lambda-llama.github.com/bitset/benchmarks
+[benchmarks]: http://lambda-llama.github.io/bitset/benchmarks/
 [hen]: https://github.com/selectel/hen/
