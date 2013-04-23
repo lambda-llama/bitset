@@ -3,6 +3,16 @@ bitset Changelog
 
 Here you can see the full list of changes between each bitset release.
 
+Version 1.4.1
+-------------
+
+Released on April 24th, 2013
+
+- Removed 'clearBitInteger' which didn't update the size field of
+  the newly created 'Integer'. Turns out it's completely non-trivial
+  to implement.
+
+
 Version 1.4.0
 -------------
 
