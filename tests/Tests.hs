@@ -80,6 +80,16 @@ propFromList xs = all (`BS.member` bs) xs where
 propEmpty :: Word16 -> Bool
 propEmpty x = x `BS.notMember` BS.empty
 
+propNullEmpty :: Bool
+propNullEmpty = BS.null bs where
+  bs :: BitSet Word16
+  bs = BS.empty
+
+propNullAfterDelete :: [Word16] -> Bool
+propNullAfterDelete xs = BS.null bs where
+  bs :: BitSet Word16
+  bs = foldr BS.delete (foldr BS.insert BS.empty xs) xs
+
 propIntersectionWithSelf :: [Word16] -> Bool
 propIntersectionWithSelf xs = all (`BS.member` bs) xs
   where
@@ -181,6 +191,8 @@ main = defaultMain tests where
           , testProperty "toList" propToList
           , testProperty "fromList" propFromList
           , testProperty "empty" propEmpty
+          , testProperty "native empty is null" propNullEmpty
+          , testProperty "generated empty is null" propNullAfterDelete
           , testProperty "intersection with self" propIntersectionWithSelf
           , testProperty "intersection" propIntersection
           , testProperty "difference with self" propDifferenceWithSelf

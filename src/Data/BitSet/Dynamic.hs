@@ -78,11 +78,10 @@ import Data.Bits (Bits(..))
 import GHC.Base (Int(..), divInt#, modInt#)
 import GHC.Exts (popCnt#)
 import GHC.Integer.GMP.Internals (Integer(..))
-import GHC.Prim (State#, RealWorld, Int#, Word#, ByteArray#,
+import GHC.Prim (Int#, Word#,
                  (+#), (==#), (>=#), (<#), negateInt#,
-                 word2Int#, int2Word#, plusWord#, realWorld#,
-                 newByteArray#, copyByteArray#, writeWordArray#,
-                 indexWordArray#, unsafeFreezeByteArray#, sizeofByteArray#)
+                 word2Int#, int2Word#, plusWord#,
+                 indexWordArray#)
 import GHC.Word (Word(..))
 
 import Control.DeepSeq (NFData(..))
@@ -122,7 +121,7 @@ instance Bits FasterInteger where
     setBit (FasterInteger x) = FasterInteger . setBit x
     {-# SPECIALIZE INLINE setBit :: FasterInteger -> Int -> FasterInteger #-}
 
-    clearBit (FasterInteger x) = FasterInteger . clearBitInteger x
+    clearBit (FasterInteger x) = FasterInteger . clearBit x
     {-# SPECIALIZE INLINE clearBit :: FasterInteger -> Int -> FasterInteger #-}
 
     popCount (FasterInteger x) = I# (word2Int# (popCountInteger x))
@@ -275,23 +274,3 @@ testBitInteger (J# s# d#) (I# b#) =
   where
     (# !block#, !offset# #) = b# `divModInt#` WORD_SIZE_IN_BITS#
 {-# NOINLINE testBitInteger #-}
-
-clearBitInteger :: Integer -> Int -> Integer
-clearBitInteger (S# i#) b = S# i# `clearBit` b
-clearBitInteger i@(J# s# d0#) (I# b#) =
-    if b# <# 0# || block# >=# abs# s#
-    then i
-    else J# s# (go realWorld#)
-  where
-    (# !block#, !offset# #) = b# `divModInt#` WORD_SIZE_IN_BITS#
-
-    go :: State# RealWorld -> ByteArray#
-    go state0 =
-        let !n = sizeofByteArray# d0#
-            (# state1, !d1 #) = newByteArray# n state0
-            state2 = copyByteArray# d0# 0# d1 0# n state1
-            !(W# chunk) = W# (indexWordArray# d0# block#) `clearBit` I# offset#
-            state3 = writeWordArray# d1 block# chunk state2
-            (# _state4, d2 #) = unsafeFreezeByteArray# d1 state3
-        in d2
-{-# NOINLINE clearBitInteger #-}
