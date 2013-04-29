@@ -75,17 +75,12 @@ module Data.BitSet.Dynamic
 import Prelude hiding (null, map, filter, foldr)
 
 import Data.Bits (Bits(..))
-import GHC.Base (Int(..), divInt#, modInt#)
-import GHC.Exts (popCnt#)
-import GHC.Integer.GMP.Internals (Integer(..))
-import GHC.Prim (Int#, Word#,
-                 (+#), (==#), (>=#), (<#), negateInt#,
-                 word2Int#, int2Word#, plusWord#,
-                 indexWordArray#)
-import GHC.Word (Word(..))
+import GHC.Base (Int(..))
 
 import Control.DeepSeq (NFData(..))
 
+import GHC.Integer.GMP.TypeExt (popCountInteger, testBitInteger,
+                                setBitInteger, clearBitInteger)
 import Data.BitSet.Generic (GBitSet)
 import qualified Data.BitSet.Generic as GS
 
@@ -115,16 +110,16 @@ instance Bits FasterInteger where
     bit = FasterInteger . bit
     {-# INLINE bit #-}
 
-    testBit (FasterInteger x) i = testBitInteger x i
-    {-# SPECIALIZE INLINE [1] testBit :: FasterInteger -> Int -> Bool #-}
+    testBit (FasterInteger x) (I# i) = testBitInteger x i
+    {-# SPECIALIZE INLINE testBit :: FasterInteger -> Int -> Bool #-}
 
-    setBit (FasterInteger x) = FasterInteger . setBit x
+    setBit (FasterInteger x) (I# i) = FasterInteger $ setBitInteger x i
     {-# SPECIALIZE INLINE setBit :: FasterInteger -> Int -> FasterInteger #-}
 
-    clearBit (FasterInteger x) = FasterInteger . clearBit x
+    clearBit (FasterInteger x) (I# i) = FasterInteger $ clearBitInteger x i
     {-# SPECIALIZE INLINE clearBit :: FasterInteger -> Int -> FasterInteger #-}
 
-    popCount (FasterInteger x) = I# (word2Int# (popCountInteger x))
+    popCount (FasterInteger x) = I# (popCountInteger x)
     {-# SPECIALIZE INLINE popCount :: FasterInteger -> Int #-}
 
     bitSize = bitSize . unFI
@@ -240,37 +235,3 @@ toList = GS.toList
 fromList :: Enum a => [a] -> BitSet a
 fromList = GS.fromList
 {-# INLINE fromList #-}
-
-popCountInteger :: Integer -> Word#
-popCountInteger (S# i#)    = popCnt# (int2Word# i#)
-popCountInteger (J# s# d#) = go 0# (int2Word# 0#) where
-  go i acc =
-      if i ==# s#
-      then acc
-      else go (i +# 1#) $ acc `plusWord#` popCnt# (indexWordArray# d# i)
-{-# INLINE popCountInteger #-}
-
-#include "MachDeps.h"
-#ifndef WORD_SIZE_IN_BITS
-#error WORD_SIZE_IN_BITS not defined!
-#endif
-
-divModInt# :: Int# -> Int# -> (# Int#, Int# #)
-divModInt# x y = (# d, m #) where
-  !d = x `divInt#` y
-  !m = x `modInt#` y
-{-# INLINE divModInt# #-}
-
-abs# :: Int# -> Int#
-abs# x = if x <# 0# then negateInt# x else x
-{-# INLINE abs# #-}
-
-testBitInteger :: Integer -> Int -> Bool
-testBitInteger (S# i#) b = I# i# `testBit` b
-testBitInteger (J# s# d#) (I# b#) =
-    if b# <# 0# || block# >=# abs# s#
-    then False
-    else W# (indexWordArray# d# block#) `testBit` I# offset#
-  where
-    (# !block#, !offset# #) = b# `divModInt#` WORD_SIZE_IN_BITS#
-{-# NOINLINE testBitInteger #-}
