@@ -3,6 +3,13 @@ bitset Changelog
 
 Here you can see the full list of changes between each bitset release.
 
+Version 1.4.2
+-------------
+
+- Switched to GMP bit fiddling functions, the corresponding patch for
+  'integer-gmp' was submitted to GHC, see
+  http://hackage.haskell.org/trac/ghc/ticket/7860
+
 Version 1.4.1
 -------------
 

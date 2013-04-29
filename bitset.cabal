@@ -1,5 +1,5 @@
 Name:                 bitset
-Version:              1.4.1
+Version:              1.4.2
 Synopsis:             A space-efficient set data structure.
 Description:
   A /bit set/ is a compact data structure, which maintains a set of members
@@ -16,7 +16,7 @@ Bug-reports:          http://github.com/lambda-llama/bitset/issues
 Stability:            Experimental
 Cabal-Version:        >= 1.12
 Build-type:           Custom
-Tested-with:          GHC >= 7.4.2
+Tested-with:          GHC >= 7.4.1
 
 Source-repository head
   Type:     git
