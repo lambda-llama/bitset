@@ -15,7 +15,7 @@ Maintainer:           superbobry@gmail.com
 Bug-reports:          http://github.com/lambda-llama/bitset/issues
 Stability:            Experimental
 Cabal-Version:        >= 1.12
-Build-type:           Simple
+Build-type:           Custom
 Tested-with:          GHC >= 7.4.2
 
 Source-repository head
@@ -42,9 +42,6 @@ Library
                     , Data.BitSet.Word
   Other-modules:      GHC.Integer.GMP.PrimExt
                     , GHC.Integer.GMP.TypeExt
-
-Executable mkDerivedConstants
-  C-Sources:          cbits/mkDerivedConstants.c
 
 Test-suite bitset-tests
   Hs-source-dirs:     tests
