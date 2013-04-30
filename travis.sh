@@ -6,7 +6,7 @@ cabal configure --enable-tests --enable-benchmarks
 cabal build
 cabal test
 
-cabal bench --benchmark-option='--output=index.html'
+cabal bench --benchmark-options='-o index.html -G -s500'
 
 cabal configure
 cabal install hscolour
