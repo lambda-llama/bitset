@@ -256,7 +256,7 @@ filter f = fromList . List.filter f . toList
 
 -- | /O(d * n)/. Convert this bit set set to a list of elements.
 toList :: Num c => GBitSet c a -> [a]
-toList bs = build (\f acc -> foldr f acc bs)
+toList bs = build (\k z -> foldr k z bs)
 {-# INLINE toList #-}
 
 -- | /O(d * n)/. Make a bit set from a list of elements.
