@@ -3,6 +3,13 @@ bitset Changelog
 
 Here you can see the full list of changes between each bitset release.
 
+Version 1.4.4
+-------------
+
+Released on May 14th, 2013
+
+- Fixed bug with wrong Eq instance.
+
 Version 1.4.3
 -------------
 

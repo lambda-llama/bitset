@@ -101,7 +101,7 @@ data GBitSet c a =
     deriving Typeable
 
 instance Eq (GBitSet c a) where
-    (==) = (==) `on` _n
+    BitSet n1 b1 == BitSet n2 b2 = n1 == n2 && b1 == b2
 
 instance Ord (GBitSet c a) where
     compare = compare `on` _n
