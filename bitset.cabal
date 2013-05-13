@@ -1,5 +1,5 @@
 Name:                 bitset
-Version:              1.4.2
+Version:              1.4.3
 Synopsis:             A space-efficient set data structure.
 Description:
   A /bit set/ is a compact data structure, which maintains a set of members
@@ -17,6 +17,7 @@ Stability:            Experimental
 Cabal-Version:        >= 1.12
 Build-type:           Custom
 Tested-with:          GHC >= 7.4.1
+Extra-Source-Files:   bin/mkDerivedGmpConstants.c
 
 Source-repository head
   Type:     git

@@ -3,6 +3,13 @@ bitset Changelog
 
 Here you can see the full list of changes between each bitset release.
 
+Version 1.4.3
+-------------
+
+Released on May 13th, 2013
+
+- Fixed bug with broken cabal distribution.
+
 Version 1.4.2
 -------------
 
