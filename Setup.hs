@@ -1,4 +1,5 @@
 #!/usr/bin/env runhaskell
+
 {-# LANGUAGE NamedFieldPuns #-}
 {-# OPTIONS_GHC -Wall -Werror #-}
 
@@ -11,7 +12,7 @@ import Distribution.Simple (UserHooks(..),
 import Distribution.Simple.LocalBuildInfo (LocalBuildInfo(..))
 import Distribution.Simple.Program (gccProgram, lookupProgram, runProgram)
 import Distribution.Simple.Setup (BuildFlags)
-import Distribution.Simple.Utils (die, rawSystemStdout, writeFileAtomic)
+import Distribution.Simple.Utils (die, rawSystemStdout)
 import Distribution.Verbosity (silent)
 
 main :: IO ()
@@ -30,7 +31,7 @@ main = defaultMainWithHooks
                     runProgram silent gcc
                         ["bin" </> "mkDerivedGmpConstants.c", "-o", path]
                     output <- rawSystemStdout silent path []
-                    writeFileAtomic ("cbits" </> "GmpDerivedConstants.h") output
+                    writeFile ("cbits" </> "GmpDerivedConstants.h") output
                     removeFile path
                     buildHook simpleUserHooks pkg_descr lbi userHooks flags
             Nothing -> die "Failed to find GCC!"
