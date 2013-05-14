@@ -84,7 +84,6 @@ import Control.DeepSeq (NFData(..))
 import Data.Bits (Bits, (.|.), (.&.), complement, bit,
                   testBit, setBit, clearBit, popCount)
 import Data.Data (Typeable)
-import Data.Function (on)
 import Data.Monoid (Monoid(..), (<>))
 import Foreign (Storable(..), castPtr)
 import GHC.Exts (build)
@@ -100,11 +99,15 @@ data GBitSet c a =
            }
     deriving Typeable
 
-instance Eq (GBitSet c a) where
-    BitSet n1 b1 == BitSet n2 b2 = n1 == n2 && b1 == b2
+instance Eq c => Eq (GBitSet c a) where
+    BitSet { _n = n1, _bits = b1 } == BitSet { _n = n2, _bits = b2 } =
+        n1 == n2 && b1 == b2
 
-instance Ord (GBitSet c a) where
-    compare = compare `on` _n
+instance Ord c => Ord (GBitSet c a) where
+    BitSet { _n = n1, _bits = b1 } `compare` BitSet { _n = n2, _bits = b2 } =
+        case compare n1 n2 of
+            EQ  -> compare b1 b2
+            res -> res
 
 instance (Enum a, Read a, Bits c, Num c) => Read (GBitSet c a) where
     readPrec = parens . prec 10 $ do
@@ -144,7 +147,8 @@ instance Num c => Foldable.Foldable (GBitSet c) where
 
 -- | /O(1)/. Is the bit set empty?
 null :: GBitSet c a -> Bool
-null (BitSet { _bits }) = _bits == 0
+null (BitSet { _n = 0, _bits = 0 }) = True
+null _bs = False
 {-# INLINE null #-}
 
 -- | /O(1)/. The number of elements in the bit set.
