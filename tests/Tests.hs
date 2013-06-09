@@ -4,17 +4,20 @@
 module Main (main) where
 
 import Control.Applicative ((<$>))
+import Data.Bits (popCount, testBit, setBit, clearBit)
+import Data.Int (Int16)
 import Data.List ((\\), intersect, union, nub, sort)
 import Data.Monoid ((<>), mempty)
 import Data.Word (Word16)
 import Foreign (Storable(..), allocaBytes)
 
-import Test.Framework (Test, defaultMain)
+import Test.Framework (Test, testGroup, defaultMain)
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.QuickCheck (Property, Arbitrary(..), (==>), classify)
 import Test.QuickCheck.Monadic (monadicIO, assert, run)
 
 import Data.BitSet (BitSet)
+import Data.BitSet.Dynamic (FasterInteger(..))
 import Data.BitSet.Generic (GBitSet)
 import qualified Data.BitSet as BS
 import qualified Data.BitSet.Generic as GS
@@ -27,6 +30,9 @@ instance (Arbitrary a, Enum a) => Arbitrary (GBitSet Word16 a) where
 
 instance Show (Word16 -> a) where
     show = const "FUNCTION"
+
+instance Arbitrary FasterInteger where
+    arbitrary = FasterInteger <$> arbitrary
 
 propSize :: [Word16] -> Bool
 propSize = go . nub where
@@ -177,31 +183,83 @@ propStorable storable = monadicIO $ do
   where
     size = sizeOf storable
 
+
+propPopCount :: FasterInteger -> Property
+propPopCount xfi = xfi >= 0 ==> popCount xfi == popCount xi where
+  xi :: Integer
+  xi = fromIntegral xfi
+
+propTestBit :: FasterInteger -> Int16 -> Property
+propTestBit xfi i = xfi >= 0 ==> testBit xfi bit == testBit xi bit where
+  bit :: Int
+  bit = fromIntegral i
+
+  xi :: Integer
+  xi = fromIntegral xfi
+
+propSetBit :: FasterInteger -> Int16 -> Property
+propSetBit xfi i =
+    xfi >= 0 ==> setBit xfi bit == FasterInteger (setBit xi bit)
+  where
+    bit :: Int
+    bit = fromIntegral i
+
+    xi :: Integer
+    xi = fromIntegral xfi
+
+propClearBit :: FasterInteger -> Int16 -> Property
+propClearBit xfi i =
+    xfi >= 0 ==>
+    classify True "x not in bs" $
+    clearBit xfi bit == FasterInteger (clearBit xi bit)
+
+  where
+    bit :: Int
+    bit = fromIntegral i
+
+    xi :: Integer
+    xi = fromIntegral xfi
+
+
 main :: IO ()
 main = defaultMain tests where
   tests :: [Test]
-  tests = [ testProperty "size" propSize
-          , testProperty "size after insert" propSizeAfterInsert
-          , testProperty "size after delete" propSizeAfterDelete
-          , testProperty "insert" propInsertMember
-          , testProperty "delete" propDeleteMember
-          , testProperty "insert and delete are idempotent" propInsertDeleteIdempotent
-          , testProperty "delete is idempotent" propDeleteIdempotent
-          , testProperty "insert is idempotent" propInsertIdempotent
-          , testProperty "toList" propToList
-          , testProperty "fromList" propFromList
-          , testProperty "empty" propEmpty
-          , testProperty "native empty is null" propNullEmpty
-          , testProperty "generated empty is null" propNullAfterDelete
-          , testProperty "intersection with self" propIntersectionWithSelf
-          , testProperty "intersection" propIntersection
-          , testProperty "difference with self" propDifferenceWithSelf
-          , testProperty "difference" propDifference
-          , testProperty "monoid laws" propMonoidLaws
-          , testProperty "is subset of self" propIsSubsetOfSelf
-          , testProperty "is subset of" propIsSubsetOf
-          , testProperty "show read" propShowRead
-          , testProperty "map" propMap
-          , testProperty "filter" propFilter
-          , testProperty "storable instance" propStorable
+  tests = [ testGroup "Data.BitSet" testsBitSet
+          , testGroup "GHC.Integer.GMP" testsFasterInteger
           ]
+
+  testsBitSet :: [Test]
+  testsBitSet =
+      [ testProperty "size" propSize
+      , testProperty "size after insert" propSizeAfterInsert
+      , testProperty "size after delete" propSizeAfterDelete
+      , testProperty "insert" propInsertMember
+      , testProperty "delete" propDeleteMember
+      , testProperty "insert and delete are idempotent" propInsertDeleteIdempotent
+      , testProperty "delete is idempotent" propDeleteIdempotent
+      , testProperty "insert is idempotent" propInsertIdempotent
+      , testProperty "toList" propToList
+      , testProperty "fromList" propFromList
+      , testProperty "empty" propEmpty
+      , testProperty "native empty is null" propNullEmpty
+      , testProperty "generated empty is null" propNullAfterDelete
+      , testProperty "intersection with self" propIntersectionWithSelf
+      , testProperty "intersection" propIntersection
+      , testProperty "difference with self" propDifferenceWithSelf
+      , testProperty "difference" propDifference
+      , testProperty "monoid laws" propMonoidLaws
+      , testProperty "is subset of self" propIsSubsetOfSelf
+      , testProperty "is subset of" propIsSubsetOf
+      , testProperty "show read" propShowRead
+      , testProperty "map" propMap
+      , testProperty "filter" propFilter
+      , testProperty "storable instance" propStorable
+      ]
+
+  testsFasterInteger :: [Test]
+  testsFasterInteger =
+      [ testProperty "pop count" propPopCount
+      , testProperty "test bit" propTestBit
+      , testProperty "set bit" propSetBit
+      , testProperty "clear bit" propClearBit
+      ]

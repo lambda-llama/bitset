@@ -29,7 +29,7 @@
 module Data.BitSet.Dynamic
     (
     -- * Bit set type
-      FasterInteger
+      FasterInteger(FasterInteger)
     , BitSet
 
     -- * Operators
