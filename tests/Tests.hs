@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
@@ -184,10 +185,12 @@ propStorable storable = monadicIO $ do
     size = sizeOf storable
 
 
+#if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 706)
 propPopCount :: FasterInteger -> Property
 propPopCount xfi = xfi >= 0 ==> popCount xfi == popCount xi where
   xi :: Integer
   xi = fromIntegral xfi
+#endif
 
 propTestBit :: FasterInteger -> Int16 -> Property
 propTestBit xfi i = xfi >= 0 ==> testBit xfi bit == testBit xi bit where
@@ -258,8 +261,12 @@ main = defaultMain tests where
 
   testsFasterInteger :: [Test]
   testsFasterInteger =
-      [ testProperty "pop count" propPopCount
-      , testProperty "test bit" propTestBit
+      [
+#if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 706)
+        testProperty "pop count" propPopCount
+      ,
+#endif
+        testProperty "test bit" propTestBit
       , testProperty "set bit" propSetBit
       , testProperty "clear bit" propClearBit
       ]
