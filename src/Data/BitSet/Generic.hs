@@ -95,7 +95,11 @@ import qualified Data.List as List
 data GBitSet c a =
     (Enum a, Bits c, Num c) =>
     BitSet { _n    :: {-# UNPACK #-} !Int  -- ^ Number of elements in the bit set.
+#if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 708)
+           , _bits :: {-# UNPACK #-} !c    -- ^ Bit container.
+#else
            , _bits :: !c                   -- ^ Bit container.
+#endif
            }
     deriving Typeable
 
