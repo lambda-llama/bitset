@@ -22,7 +22,7 @@ import GHC.Integer.GMP.PrimExt (popCountInteger#, testBitInteger#,
                                 setBitInteger#, clearBitInteger#)
 
 popCountInteger :: Integer -> Int#
-popCountInteger (S# i)   = (word2Int# (popCnt# (int2Word# i)))
+popCountInteger (S# i)   = word2Int# (popCnt# (int2Word# i))
 popCountInteger (J# s d) = popCountInteger# s d
 {-# NOINLINE popCountInteger #-}
 
