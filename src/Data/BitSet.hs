@@ -8,7 +8,7 @@
 -- Stability   :  experimental
 -- Portability :  GHC
 --
--- A space-efficient implementation of set data structure enumerated
+-- A space-efficient implementation of set data structure for enumerated
 -- data types.
 
 module Data.BitSet ( module Data.BitSet.Dynamic ) where

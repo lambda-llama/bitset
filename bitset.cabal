@@ -32,9 +32,9 @@ Library
   Include-dirs:       cbits
 
   if os(windows)
-    Extra-libraries:    gmp-10
+    Extra-libraries:  gmp-10
   else
-    Extra-libraries:    gmp
+    Extra-libraries:  gmp
 
   Build-depends:      base                       >= 4.4.0 && < 4.7
                     , deepseq                    == 1.3.*
