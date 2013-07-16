@@ -3,6 +3,13 @@ bitset Changelog
 
 Here you can see the full list of changes between each bitset release.
 
+Version 1.4.6
+-------------
+
+Released on July 17th, 2013
+
+- Fixed build issues on Windows, see #9 on GitHub for details.
+
 Version 1.4.5
 -------------
 

@@ -1,5 +1,5 @@
 Name:                 bitset
-Version:              1.4.5
+Version:              1.4.6
 Synopsis:             A space-efficient set data structure.
 Description:
   A /bit set/ is a compact data structure, which maintains a set of members
