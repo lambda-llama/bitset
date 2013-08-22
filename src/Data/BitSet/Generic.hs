@@ -93,7 +93,7 @@ import qualified Data.List as List
 
 -- | A bit set with unspecified container type.
 data GBitSet c a = (Enum a, Bits c, Num c) => BitSet
-    { _n    :: {-# UNPACK #-} !Int  -- ^ Number of elements in the bit set.
+    { _n    :: Int                  -- ^ Number of elements in the bit set.
 #if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 708)
     , _bits :: {-# UNPACK #-} !c    -- ^ Bit container.
 #else
@@ -263,13 +263,16 @@ filter f = fromList . List.filter f . toList
 -- | /O(d * n)/. Convert this bit set set to a list of elements.
 toList :: Num c => GBitSet c a -> [a]
 toList bs = build (\k z -> foldr k z bs)
-{-# INLINE toList #-}
+{-# INLINE [0] toList #-}
 
 -- | /O(d * n)/. Make a bit set from a list of elements.
 fromList :: (Enum a, Bits c, Num c) => [a] -> GBitSet c a
 fromList xs = BitSet { _n = popCount b, _bits = b } where
   b = List.foldl' (\i x -> i `setBit` fromEnum x) 0 xs
-{-# INLINE fromList #-}
+{-# INLINE [0] fromList #-}
+{-# RULES
+"fromList/toList"    forall bs. fromList (toList bs) = bs
+  #-}
 
 -- | /O(1)/. Internal function, which extracts the underlying container
 -- from the bit set.
