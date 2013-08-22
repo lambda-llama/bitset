@@ -102,7 +102,7 @@
 <a name="line-93"></a>
 <a name="line-94"></a><a name="GBitSet"></a><span class='hs-comment'>-- | A bit set with unspecified container type.</span>
 <a name="line-95"></a><a name="GBitSet"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>GBitSet</span> <span class='hs-varid'>c</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>Bits</span> <span class='hs-varid'>c</span><span class='hs-layout'>,</span> <span class='hs-conid'>Num</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>BitSet</span>
-<a name="line-96"></a>    <span class='hs-layout'>{</span> <span class='hs-sel'>_n</span>    <span class='hs-keyglyph'>::</span> <span class='hs-comment'>{-# UNPACK #-}</span> <span class='hs-varop'>!</span><span class='hs-conid'>Int</span>  <span class='hs-comment'>-- ^ Number of elements in the bit set.</span>
+<a name="line-96"></a>    <span class='hs-layout'>{</span> <span class='hs-sel'>_n</span>    <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span>                  <span class='hs-comment'>-- ^ Number of elements in the bit set.</span>
 <a name="line-97"></a><span class='hs-cpp'>#if defined(__GLASGOW_HASKELL__) &amp;&amp; (__GLASGOW_HASKELL__ &gt;= 708)</span>
 <a name="line-98"></a>    <span class='hs-layout'>,</span> <span class='hs-sel'>_bits</span> <span class='hs-keyglyph'>::</span> <span class='hs-comment'>{-# UNPACK #-}</span> <span class='hs-varop'>!</span><span class='hs-varid'>c</span>    <span class='hs-comment'>-- ^ Bit container.</span>
 <a name="line-99"></a><span class='hs-cpp'>#else</span>
@@ -272,25 +272,28 @@
 <a name="line-263"></a><a name="toList"></a><span class='hs-comment'>-- | /O(d * n)/. Convert this bit set set to a list of elements.</span>
 <a name="line-264"></a><span class='hs-definition'>toList</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Num</span> <span class='hs-varid'>c</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>GBitSet</span> <span class='hs-varid'>c</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>]</span>
 <a name="line-265"></a><span class='hs-definition'>toList</span> <span class='hs-varid'>bs</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>build</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>k</span> <span class='hs-varid'>z</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>foldr</span> <span class='hs-varid'>k</span> <span class='hs-varid'>z</span> <span class='hs-varid'>bs</span><span class='hs-layout'>)</span>
-<a name="line-266"></a><span class='hs-comment'>{-# INLINE toList #-}</span>
+<a name="line-266"></a><span class='hs-comment'>{-# INLINE [0] toList #-}</span>
 <a name="line-267"></a>
 <a name="line-268"></a><a name="fromList"></a><span class='hs-comment'>-- | /O(d * n)/. Make a bit set from a list of elements.</span>
 <a name="line-269"></a><span class='hs-definition'>fromList</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>Bits</span> <span class='hs-varid'>c</span><span class='hs-layout'>,</span> <span class='hs-conid'>Num</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>]</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>GBitSet</span> <span class='hs-varid'>c</span> <span class='hs-varid'>a</span>
 <a name="line-270"></a><span class='hs-definition'>fromList</span> <span class='hs-varid'>xs</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>BitSet</span> <span class='hs-layout'>{</span> <span class='hs-sel'>_n</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>popCount</span> <span class='hs-varid'>b</span><span class='hs-layout'>,</span> <span class='hs-sel'>_bits</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>b</span> <span class='hs-layout'>}</span> <span class='hs-keyword'>where</span>
 <a name="line-271"></a>  <span class='hs-varid'>b</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>List</span><span class='hs-varop'>.</span><span class='hs-varid'>foldl'</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>i</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>i</span> <span class='hs-varop'>`setBit`</span> <span class='hs-varid'>fromEnum</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-num'>0</span> <span class='hs-varid'>xs</span>
-<a name="line-272"></a><span class='hs-comment'>{-# INLINE fromList #-}</span>
-<a name="line-273"></a>
-<a name="line-274"></a><a name="toBits"></a><span class='hs-comment'>-- | /O(1)/. Internal function, which extracts the underlying container</span>
-<a name="line-275"></a><span class='hs-comment'>-- from the bit set.</span>
-<a name="line-276"></a><span class='hs-definition'>toBits</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>GBitSet</span> <span class='hs-varid'>c</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span>
-<a name="line-277"></a><span class='hs-definition'>toBits</span> <span class='hs-keyglyph'>=</span> <span class='hs-sel'>_bits</span>
-<a name="line-278"></a><span class='hs-comment'>{-# INLINE toBits #-}</span>
-<a name="line-279"></a>
-<a name="line-280"></a><a name="unsafeFromBits"></a><span class='hs-comment'>-- | /O(1)/. Internal function, which constructs a bit set, using a given</span>
-<a name="line-281"></a><span class='hs-comment'>-- container value. Highly unsafe, because we don't check if bits in the</span>
-<a name="line-282"></a><span class='hs-comment'>-- given value correspond to valid instances of type @a@.</span>
-<a name="line-283"></a><span class='hs-definition'>unsafeFromBits</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>Bits</span> <span class='hs-varid'>c</span><span class='hs-layout'>,</span> <span class='hs-conid'>Num</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>GBitSet</span> <span class='hs-varid'>c</span> <span class='hs-varid'>a</span>
-<a name="line-284"></a><span class='hs-definition'>unsafeFromBits</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>BitSet</span> <span class='hs-layout'>{</span> <span class='hs-sel'>_n</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>popCount</span> <span class='hs-varid'>b</span><span class='hs-layout'>,</span> <span class='hs-sel'>_bits</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>b</span> <span class='hs-layout'>}</span>
-<a name="line-285"></a><span class='hs-comment'>{-# INLINE unsafeFromBits #-}</span>
+<a name="line-272"></a><span class='hs-comment'>{-# INLINE [0] fromList #-}</span>
+<a name="line-273"></a><span class='hs-comment'>{-# RULES
+<a name="line-274"></a>"fromList/toList"    forall bs. fromList (toList bs) = bs
+<a name="line-275"></a>  #-}</span>
+<a name="line-276"></a>
+<a name="line-277"></a><a name="toBits"></a><span class='hs-comment'>-- | /O(1)/. Internal function, which extracts the underlying container</span>
+<a name="line-278"></a><span class='hs-comment'>-- from the bit set.</span>
+<a name="line-279"></a><span class='hs-definition'>toBits</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>GBitSet</span> <span class='hs-varid'>c</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span>
+<a name="line-280"></a><span class='hs-definition'>toBits</span> <span class='hs-keyglyph'>=</span> <span class='hs-sel'>_bits</span>
+<a name="line-281"></a><span class='hs-comment'>{-# INLINE toBits #-}</span>
+<a name="line-282"></a>
+<a name="line-283"></a><a name="unsafeFromBits"></a><span class='hs-comment'>-- | /O(1)/. Internal function, which constructs a bit set, using a given</span>
+<a name="line-284"></a><span class='hs-comment'>-- container value. Highly unsafe, because we don't check if bits in the</span>
+<a name="line-285"></a><span class='hs-comment'>-- given value correspond to valid instances of type @a@.</span>
+<a name="line-286"></a><span class='hs-definition'>unsafeFromBits</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>Bits</span> <span class='hs-varid'>c</span><span class='hs-layout'>,</span> <span class='hs-conid'>Num</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>GBitSet</span> <span class='hs-varid'>c</span> <span class='hs-varid'>a</span>
+<a name="line-287"></a><span class='hs-definition'>unsafeFromBits</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>BitSet</span> <span class='hs-layout'>{</span> <span class='hs-sel'>_n</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>popCount</span> <span class='hs-varid'>b</span><span class='hs-layout'>,</span> <span class='hs-sel'>_bits</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>b</span> <span class='hs-layout'>}</span>
+<a name="line-288"></a><span class='hs-comment'>{-# INLINE unsafeFromBits #-}</span>
 </pre></body>
 </html>
