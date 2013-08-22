@@ -25,11 +25,11 @@
 -- independent of container choice, the maximum number of elements in a
 -- bit set is bounded by @maxBound :: Int@.
 
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE GADTs #-}
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Data.BitSet.Generic
     (
@@ -92,16 +92,14 @@ import qualified Data.Foldable as Foldable
 import qualified Data.List as List
 
 -- | A bit set with unspecified container type.
-data GBitSet c a =
-    (Enum a, Bits c, Num c) =>
-    BitSet { _n    :: {-# UNPACK #-} !Int  -- ^ Number of elements in the bit set.
+data GBitSet c a = (Enum a, Bits c, Num c) => BitSet
+    { _n    :: {-# UNPACK #-} !Int  -- ^ Number of elements in the bit set.
 #if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 708)
-           , _bits :: {-# UNPACK #-} !c    -- ^ Bit container.
+    , _bits :: {-# UNPACK #-} !c    -- ^ Bit container.
 #else
-           , _bits :: !c                   -- ^ Bit container.
+    , _bits :: !c                   -- ^ Bit container.
 #endif
-           }
-    deriving Typeable
+    } deriving Typeable
 
 instance Eq c => Eq (GBitSet c a) where
     BitSet { _n = n1, _bits = b1 } == BitSet { _n = n2, _bits = b2 } =
@@ -165,12 +163,12 @@ member :: (Enum a , Bits c) => a -> GBitSet c a -> Bool
 member x = (`testBit` fromEnum x) . _bits
 {-# INLINE member #-}
 
--- | /O(d)/. Ask whether the item is in the bit set.
+-- | /O(d)/. Ask whether the item is not in the bit set.
 notMember :: (Enum a, Bits c) => a -> GBitSet c a -> Bool
 notMember x = not . member x
 {-# INLINE notMember #-}
 
--- | /O(max(n, m))/. Is this a subset? (@s1 isSubsetOf s2@) tells whether
+-- | /O(max(n, m))/. Is this a subset? (@s1 `isSubsetOf` s2@) tells whether
 -- @s1@ is a subset of @s2@.
 isSubsetOf :: GBitSet c a -> GBitSet c a -> Bool
 isSubsetOf (BitSet { _n = n1, _bits = b1 }) (BitSet { _n = n2, _bits = b2 }) =
