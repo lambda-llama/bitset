@@ -78,7 +78,6 @@ import Control.DeepSeq (NFData(..))
 
 import GHC.Integer.GMP.TypeExt (popCountInteger, testBitInteger,
                                 setBitInteger, clearBitInteger)
-import Data.BitSet.Generic (GBitSet)
 import qualified Data.BitSet.Generic as GS
 
 -- | A wrapper around 'Integer' which provides faster bit-level operations.
@@ -125,7 +124,7 @@ instance Bits FasterInteger where
     isSigned = isSigned . unFI
     {-# INLINE isSigned #-}
 
-type BitSet = GBitSet FasterInteger
+type BitSet = GS.BitSet FasterInteger
 
 -- | /O(1)/. Is the bit set empty?
 null :: BitSet a -> Bool
@@ -169,12 +168,12 @@ singleton = GS.singleton
 {-# INLINE singleton #-}
 
 -- | /O(1)/. Insert an item into the bit set.
-insert :: a -> BitSet a -> BitSet a
+insert :: Enum a => a -> BitSet a -> BitSet a
 insert = GS.insert
 {-# INLINE insert #-}
 
 -- | /O(1)/. Delete an item from the bit set.
-delete :: a -> BitSet a -> BitSet a
+delete :: Enum a => a -> BitSet a -> BitSet a
 delete = GS.delete
 {-# INLINE delete #-}
 
@@ -207,13 +206,13 @@ map = GS.map
 -- elements, using the given starting value.  Each application of the
 -- operator is evaluated before before using the result in the next
 -- application.  This function is strict in the starting value.
-foldl' :: (b -> a -> b) -> b -> BitSet a -> b
+foldl' :: Enum a => (b -> a -> b) -> b -> BitSet a -> b
 foldl' = GS.foldl'
 {-# INLINE foldl' #-}
 
 -- | /O(n)/ Reduce this bit set by applying a binary function to all
 -- elements, using the given starting value.
-foldr :: (a -> b -> b) -> b -> BitSet a -> b
+foldr :: Enum a => (a -> b -> b) -> b -> BitSet a -> b
 foldr = GS.foldr
 {-# INLINE foldr #-}
 
@@ -224,7 +223,7 @@ filter = GS.filter
 {-# INLINE filter #-}
 
 -- | /O(n)/. Convert the bit set set to a list of elements.
-toList :: BitSet a -> [a]
+toList :: Enum a => BitSet a -> [a]
 toList = GS.toList
 {-# INLINE toList #-}
 

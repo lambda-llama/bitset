@@ -72,10 +72,9 @@ import Prelude hiding (null, map, filter, foldr)
 
 import Data.Word (Word)
 
-import Data.BitSet.Generic (GBitSet)
 import qualified Data.BitSet.Generic as GS
 
-type BitSet = GBitSet Word
+type BitSet = GS.BitSet Word
 
 -- | /O(1)/. Is the bit set empty?
 null :: BitSet a -> Bool
@@ -119,12 +118,12 @@ singleton = GS.singleton
 {-# INLINE singleton #-}
 
 -- | /O(1)/. Insert an item into the bit set.
-insert :: a -> BitSet a -> BitSet a
+insert :: Enum a => a -> BitSet a -> BitSet a
 insert = GS.insert
 {-# INLINE insert #-}
 
 -- | /O(1)/. Delete an item from the bit set.
-delete :: a -> BitSet a -> BitSet a
+delete :: Enum a => a -> BitSet a -> BitSet a
 delete = GS.delete
 {-# INLINE delete #-}
 
@@ -151,18 +150,19 @@ intersection = GS.intersection
 -- Resulting bit set may be smaller then the original.
 map :: (Enum a, Enum b) => (a -> b) -> BitSet a -> BitSet b
 map = GS.map
+{-# INLINE map #-}
 
 -- | /O(n)/ Reduce this bit set by applying a binary function to all
 -- elements, using the given starting value.  Each application of the
 -- operator is evaluated before before using the result in the next
 -- application.  This function is strict in the starting value.
-foldl' :: (b -> a -> b) -> b -> BitSet a -> b
+foldl' :: Enum a => (b -> a -> b) -> b -> BitSet a -> b
 foldl' = GS.foldl'
 {-# INLINE foldl' #-}
 
 -- | /O(n)/ Reduce this bit set by applying a binary function to all
 -- elements, using the given starting value.
-foldr :: (a -> b -> b) -> b -> BitSet a -> b
+foldr :: Enum a => (a -> b -> b) -> b -> BitSet a -> b
 foldr = GS.foldr
 {-# INLINE foldr #-}
 
@@ -173,7 +173,7 @@ filter = GS.filter
 {-# INLINE filter #-}
 
 -- | /O(n)/. Convert the bit set set to a list of elements.
-toList :: BitSet a -> [a]
+toList :: Enum a => BitSet a -> [a]
 toList = GS.toList
 {-# INLINE toList #-}
 
