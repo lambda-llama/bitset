@@ -81,97 +81,97 @@
 <a name="line-72"></a>
 <a name="line-73"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Word</span> <span class='hs-layout'>(</span><span class='hs-conid'>Word</span><span class='hs-layout'>)</span>
 <a name="line-74"></a>
-<a name="line-75"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>BitSet</span><span class='hs-varop'>.</span><span class='hs-conid'>Generic</span> <span class='hs-layout'>(</span><span class='hs-conid'>GBitSet</span><span class='hs-layout'>)</span>
-<a name="line-76"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>BitSet</span><span class='hs-varop'>.</span><span class='hs-conid'>Generic</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>GS</span>
-<a name="line-77"></a>
-<a name="line-78"></a><a name="BitSet"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>BitSet</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GBitSet</span> <span class='hs-conid'>Word</span>
-<a name="line-79"></a>
-<a name="line-80"></a><a name="null"></a><span class='hs-comment'>-- | /O(1)/. Is the bit set empty?</span>
-<a name="line-81"></a><span class='hs-definition'>null</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
-<a name="line-82"></a><span class='hs-definition'>null</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>null</span>
-<a name="line-83"></a><span class='hs-comment'>{-# INLINE null #-}</span>
-<a name="line-84"></a>
-<a name="line-85"></a><a name="size"></a><span class='hs-comment'>-- | /O(1)/. The number of elements in the bit set.</span>
-<a name="line-86"></a><span class='hs-definition'>size</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Int</span>
-<a name="line-87"></a><span class='hs-definition'>size</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>size</span>
-<a name="line-88"></a><span class='hs-comment'>{-# INLINE size #-}</span>
-<a name="line-89"></a>
-<a name="line-90"></a><a name="member"></a><span class='hs-comment'>-- | /O(1)/. Ask whether the item is in the bit set.</span>
-<a name="line-91"></a><span class='hs-definition'>member</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
-<a name="line-92"></a><span class='hs-definition'>member</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>member</span>
-<a name="line-93"></a><span class='hs-comment'>{-# INLINE member #-}</span>
-<a name="line-94"></a>
-<a name="line-95"></a><a name="notMember"></a><span class='hs-comment'>-- | /O(1)/. Ask whether the item is in the bit set.</span>
-<a name="line-96"></a><span class='hs-definition'>notMember</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
-<a name="line-97"></a><span class='hs-definition'>notMember</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>notMember</span>
-<a name="line-98"></a><span class='hs-comment'>{-# INLINE notMember #-}</span>
-<a name="line-99"></a>
-<a name="line-100"></a><a name="isSubsetOf"></a><span class='hs-comment'>-- | /O(1)/. Is this a subset? (@s1 isSubsetOf s2@) tells whether</span>
-<a name="line-101"></a><span class='hs-comment'>-- @s1@ is a subset of @s2@.</span>
-<a name="line-102"></a><span class='hs-definition'>isSubsetOf</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
-<a name="line-103"></a><span class='hs-definition'>isSubsetOf</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>isSubsetOf</span>
-<a name="line-104"></a><span class='hs-comment'>{-# INLINE isSubsetOf #-}</span>
-<a name="line-105"></a>
-<a name="line-106"></a><a name="isProperSubsetOf"></a><span class='hs-comment'>-- | /O(1)/. Is this a proper subset? (ie. a subset but not equal).</span>
-<a name="line-107"></a><span class='hs-definition'>isProperSubsetOf</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
-<a name="line-108"></a><span class='hs-definition'>isProperSubsetOf</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>isProperSubsetOf</span>
-<a name="line-109"></a><span class='hs-comment'>{-# INLINE isProperSubsetOf #-}</span>
-<a name="line-110"></a>
-<a name="line-111"></a><a name="empty"></a><span class='hs-comment'>-- | The empty bit set.</span>
-<a name="line-112"></a><span class='hs-definition'>empty</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
-<a name="line-113"></a><span class='hs-definition'>empty</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>empty</span>
-<a name="line-114"></a><span class='hs-comment'>{-# INLINE empty #-}</span>
-<a name="line-115"></a>
-<a name="line-116"></a><a name="singleton"></a><span class='hs-comment'>-- | O(1). Create a singleton set.</span>
-<a name="line-117"></a><span class='hs-definition'>singleton</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
-<a name="line-118"></a><span class='hs-definition'>singleton</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>singleton</span>
-<a name="line-119"></a><span class='hs-comment'>{-# INLINE singleton #-}</span>
-<a name="line-120"></a>
-<a name="line-121"></a><a name="insert"></a><span class='hs-comment'>-- | /O(1)/. Insert an item into the bit set.</span>
-<a name="line-122"></a><span class='hs-definition'>insert</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
-<a name="line-123"></a><span class='hs-definition'>insert</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>insert</span>
-<a name="line-124"></a><span class='hs-comment'>{-# INLINE insert #-}</span>
-<a name="line-125"></a>
-<a name="line-126"></a><a name="delete"></a><span class='hs-comment'>-- | /O(1)/. Delete an item from the bit set.</span>
-<a name="line-127"></a><span class='hs-definition'>delete</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
-<a name="line-128"></a><span class='hs-definition'>delete</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>delete</span>
-<a name="line-129"></a><span class='hs-comment'>{-# INLINE delete #-}</span>
-<a name="line-130"></a>
-<a name="line-131"></a><a name="union"></a><span class='hs-comment'>-- | /O(1)/. The union of two bit sets.</span>
-<a name="line-132"></a><span class='hs-definition'>union</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
-<a name="line-133"></a><span class='hs-definition'>union</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>union</span>
-<a name="line-134"></a><span class='hs-comment'>{-# INLINE union #-}</span>
-<a name="line-135"></a>
-<a name="line-136"></a><a name="difference"></a><span class='hs-comment'>-- | /O(1)/. Difference of two bit sets.</span>
-<a name="line-137"></a><span class='hs-definition'>difference</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
-<a name="line-138"></a><span class='hs-definition'>difference</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>difference</span>
-<a name="line-139"></a><span class='hs-comment'>{-# INLINE difference #-}</span>
-<a name="line-140"></a>
-<a name="line-141"></a><a name="%5c%5c"></a><span class='hs-comment'>-- | /O(1)/. See `difference'.</span>
-<a name="line-142"></a><span class='hs-layout'>(</span><span class='hs-varop'>\\</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
-<a name="line-143"></a><span class='hs-layout'>(</span><span class='hs-varop'>\\</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>difference</span>
-<a name="line-144"></a>
-<a name="line-145"></a><a name="intersection"></a><span class='hs-comment'>-- | /O(1)/. The intersection of two bit sets.</span>
-<a name="line-146"></a><span class='hs-definition'>intersection</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
-<a name="line-147"></a><span class='hs-definition'>intersection</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>intersection</span>
-<a name="line-148"></a><span class='hs-comment'>{-# INLINE intersection #-}</span>
-<a name="line-149"></a>
-<a name="line-150"></a><a name="map"></a><span class='hs-comment'>-- | /O(n)/ Transform this bit set by applying a function to every value.</span>
-<a name="line-151"></a><span class='hs-comment'>-- Resulting bit set may be smaller then the original.</span>
-<a name="line-152"></a><span class='hs-definition'>map</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>b</span>
-<a name="line-153"></a><span class='hs-definition'>map</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>map</span>
+<a name="line-75"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>BitSet</span><span class='hs-varop'>.</span><span class='hs-conid'>Generic</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>GS</span>
+<a name="line-76"></a>
+<a name="line-77"></a><a name="BitSet"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>BitSet</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-conid'>BitSet</span> <span class='hs-conid'>Word</span>
+<a name="line-78"></a>
+<a name="line-79"></a><a name="null"></a><span class='hs-comment'>-- | /O(1)/. Is the bit set empty?</span>
+<a name="line-80"></a><span class='hs-definition'>null</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
+<a name="line-81"></a><span class='hs-definition'>null</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>null</span>
+<a name="line-82"></a><span class='hs-comment'>{-# INLINE null #-}</span>
+<a name="line-83"></a>
+<a name="line-84"></a><a name="size"></a><span class='hs-comment'>-- | /O(1)/. The number of elements in the bit set.</span>
+<a name="line-85"></a><span class='hs-definition'>size</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Int</span>
+<a name="line-86"></a><span class='hs-definition'>size</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>size</span>
+<a name="line-87"></a><span class='hs-comment'>{-# INLINE size #-}</span>
+<a name="line-88"></a>
+<a name="line-89"></a><a name="member"></a><span class='hs-comment'>-- | /O(1)/. Ask whether the item is in the bit set.</span>
+<a name="line-90"></a><span class='hs-definition'>member</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
+<a name="line-91"></a><span class='hs-definition'>member</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>member</span>
+<a name="line-92"></a><span class='hs-comment'>{-# INLINE member #-}</span>
+<a name="line-93"></a>
+<a name="line-94"></a><a name="notMember"></a><span class='hs-comment'>-- | /O(1)/. Ask whether the item is in the bit set.</span>
+<a name="line-95"></a><span class='hs-definition'>notMember</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
+<a name="line-96"></a><span class='hs-definition'>notMember</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>notMember</span>
+<a name="line-97"></a><span class='hs-comment'>{-# INLINE notMember #-}</span>
+<a name="line-98"></a>
+<a name="line-99"></a><a name="isSubsetOf"></a><span class='hs-comment'>-- | /O(1)/. Is this a subset? (@s1 isSubsetOf s2@) tells whether</span>
+<a name="line-100"></a><span class='hs-comment'>-- @s1@ is a subset of @s2@.</span>
+<a name="line-101"></a><span class='hs-definition'>isSubsetOf</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
+<a name="line-102"></a><span class='hs-definition'>isSubsetOf</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>isSubsetOf</span>
+<a name="line-103"></a><span class='hs-comment'>{-# INLINE isSubsetOf #-}</span>
+<a name="line-104"></a>
+<a name="line-105"></a><a name="isProperSubsetOf"></a><span class='hs-comment'>-- | /O(1)/. Is this a proper subset? (ie. a subset but not equal).</span>
+<a name="line-106"></a><span class='hs-definition'>isProperSubsetOf</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span>
+<a name="line-107"></a><span class='hs-definition'>isProperSubsetOf</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>isProperSubsetOf</span>
+<a name="line-108"></a><span class='hs-comment'>{-# INLINE isProperSubsetOf #-}</span>
+<a name="line-109"></a>
+<a name="line-110"></a><a name="empty"></a><span class='hs-comment'>-- | The empty bit set.</span>
+<a name="line-111"></a><span class='hs-definition'>empty</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
+<a name="line-112"></a><span class='hs-definition'>empty</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>empty</span>
+<a name="line-113"></a><span class='hs-comment'>{-# INLINE empty #-}</span>
+<a name="line-114"></a>
+<a name="line-115"></a><a name="singleton"></a><span class='hs-comment'>-- | O(1). Create a singleton set.</span>
+<a name="line-116"></a><span class='hs-definition'>singleton</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
+<a name="line-117"></a><span class='hs-definition'>singleton</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>singleton</span>
+<a name="line-118"></a><span class='hs-comment'>{-# INLINE singleton #-}</span>
+<a name="line-119"></a>
+<a name="line-120"></a><a name="insert"></a><span class='hs-comment'>-- | /O(1)/. Insert an item into the bit set.</span>
+<a name="line-121"></a><span class='hs-definition'>insert</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
+<a name="line-122"></a><span class='hs-definition'>insert</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>insert</span>
+<a name="line-123"></a><span class='hs-comment'>{-# INLINE insert #-}</span>
+<a name="line-124"></a>
+<a name="line-125"></a><a name="delete"></a><span class='hs-comment'>-- | /O(1)/. Delete an item from the bit set.</span>
+<a name="line-126"></a><span class='hs-definition'>delete</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
+<a name="line-127"></a><span class='hs-definition'>delete</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>delete</span>
+<a name="line-128"></a><span class='hs-comment'>{-# INLINE delete #-}</span>
+<a name="line-129"></a>
+<a name="line-130"></a><a name="union"></a><span class='hs-comment'>-- | /O(1)/. The union of two bit sets.</span>
+<a name="line-131"></a><span class='hs-definition'>union</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
+<a name="line-132"></a><span class='hs-definition'>union</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>union</span>
+<a name="line-133"></a><span class='hs-comment'>{-# INLINE union #-}</span>
+<a name="line-134"></a>
+<a name="line-135"></a><a name="difference"></a><span class='hs-comment'>-- | /O(1)/. Difference of two bit sets.</span>
+<a name="line-136"></a><span class='hs-definition'>difference</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
+<a name="line-137"></a><span class='hs-definition'>difference</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>difference</span>
+<a name="line-138"></a><span class='hs-comment'>{-# INLINE difference #-}</span>
+<a name="line-139"></a>
+<a name="line-140"></a><a name="%5c%5c"></a><span class='hs-comment'>-- | /O(1)/. See `difference'.</span>
+<a name="line-141"></a><span class='hs-layout'>(</span><span class='hs-varop'>\\</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
+<a name="line-142"></a><span class='hs-layout'>(</span><span class='hs-varop'>\\</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>difference</span>
+<a name="line-143"></a>
+<a name="line-144"></a><a name="intersection"></a><span class='hs-comment'>-- | /O(1)/. The intersection of two bit sets.</span>
+<a name="line-145"></a><span class='hs-definition'>intersection</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span>
+<a name="line-146"></a><span class='hs-definition'>intersection</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>intersection</span>
+<a name="line-147"></a><span class='hs-comment'>{-# INLINE intersection #-}</span>
+<a name="line-148"></a>
+<a name="line-149"></a><a name="map"></a><span class='hs-comment'>-- | /O(n)/ Transform this bit set by applying a function to every value.</span>
+<a name="line-150"></a><span class='hs-comment'>-- Resulting bit set may be smaller then the original.</span>
+<a name="line-151"></a><span class='hs-definition'>map</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>b</span>
+<a name="line-152"></a><span class='hs-definition'>map</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>map</span>
+<a name="line-153"></a><span class='hs-comment'>{-# INLINE map #-}</span>
 <a name="line-154"></a>
 <a name="line-155"></a><a name="foldl'"></a><span class='hs-comment'>-- | /O(n)/ Reduce this bit set by applying a binary function to all</span>
 <a name="line-156"></a><span class='hs-comment'>-- elements, using the given starting value.  Each application of the</span>
 <a name="line-157"></a><span class='hs-comment'>-- operator is evaluated before before using the result in the next</span>
 <a name="line-158"></a><span class='hs-comment'>-- application.  This function is strict in the starting value.</span>
-<a name="line-159"></a><span class='hs-definition'>foldl'</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
+<a name="line-159"></a><span class='hs-definition'>foldl'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
 <a name="line-160"></a><span class='hs-definition'>foldl'</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>foldl'</span>
 <a name="line-161"></a><span class='hs-comment'>{-# INLINE foldl' #-}</span>
 <a name="line-162"></a>
 <a name="line-163"></a><a name="foldr"></a><span class='hs-comment'>-- | /O(n)/ Reduce this bit set by applying a binary function to all</span>
 <a name="line-164"></a><span class='hs-comment'>-- elements, using the given starting value.</span>
-<a name="line-165"></a><span class='hs-definition'>foldr</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
+<a name="line-165"></a><span class='hs-definition'>foldr</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
 <a name="line-166"></a><span class='hs-definition'>foldr</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>foldr</span>
 <a name="line-167"></a><span class='hs-comment'>{-# INLINE foldr #-}</span>
 <a name="line-168"></a>
@@ -182,7 +182,7 @@
 <a name="line-173"></a><span class='hs-comment'>{-# INLINE filter #-}</span>
 <a name="line-174"></a>
 <a name="line-175"></a><a name="toList"></a><span class='hs-comment'>-- | /O(n)/. Convert the bit set set to a list of elements.</span>
-<a name="line-176"></a><span class='hs-definition'>toList</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>]</span>
+<a name="line-176"></a><span class='hs-definition'>toList</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Enum</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>BitSet</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>]</span>
 <a name="line-177"></a><span class='hs-definition'>toList</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>GS</span><span class='hs-varop'>.</span><span class='hs-varid'>toList</span>
 <a name="line-178"></a><span class='hs-comment'>{-# INLINE toList #-}</span>
 <a name="line-179"></a>
