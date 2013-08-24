@@ -1,5 +1,5 @@
 Name:                 bitset
-Version:              1.4.6
+Version:              1.4.7
 Synopsis:             A space-efficient set data structure.
 Description:
   A /bit set/ is a compact data structure, which maintains a set of members
@@ -79,7 +79,7 @@ Benchmark bitset-benchmarks
                     , integer-gmp
                     , ghc-prim
 
-                    , criterion                   == 0.6.*
+                    , criterion                   == 0.8.*
                     , containers                  >= 0.4.2
                     , random                      == 1.0.*
                     , random-shuffle              == 0.0.4

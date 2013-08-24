@@ -3,6 +3,14 @@ bitset Changelog
 
 Here you can see the full list of changes between each bitset release.
 
+Version 1.4.7
+-------------
+
+Released on August 25th, 2013
+
+- 'GBitSet' was renamed to 'BitSet' and is now 'newtype' as suggested
+  by John Ericson.
+
 Version 1.4.6
 -------------
 
