@@ -21,6 +21,12 @@ import GHC.Prim (Int#, (/=#), (>=#), (<#), (-#),
 import GHC.Integer.GMP.PrimExt (popCountInteger#, testBitInteger#,
                                 setBitInteger#, clearBitInteger#)
 
+#if __GLASGOW_HASKELL__ >= 707
+import GHC.Exts (isTrue#)
+#else
+isTrue# = id
+#endif
+
 popCountInteger :: Integer -> Int#
 popCountInteger (S# i)   = word2Int# (popCnt# (int2Word# i))
 popCountInteger (J# s d) = popCountInteger# s d
@@ -28,19 +34,19 @@ popCountInteger (J# s d) = popCountInteger# s d
 
 testBitInteger :: Integer -> Int# -> Bool
 testBitInteger (S# j) i
-    | i <# 0# = False
-    | i <# (WORD_SIZE_IN_BITS# -# 1#) =
+    | isTrue# (i <# 0#) = False
+    | isTrue# (i <# (WORD_SIZE_IN_BITS# -# 1#)) =
         let !mask = 1# `uncheckedIShiftL#` i in
-        word2Int# (int2Word# j `and#` int2Word# mask) /=# 0#
+        isTrue# (word2Int# (int2Word# j `and#` int2Word# mask) /=# 0#)
     | otherwise =
         let !(# s, d #) = int2Integer# j in testBitInteger (J# s d) i
-testBitInteger (J# s d) i = testBitInteger# s d i /=# 0#
+testBitInteger (J# s d) i = isTrue# (testBitInteger# s d i /=# 0#)
 {-# NOINLINE testBitInteger #-}
 
 setBitInteger :: Integer -> Int# -> Integer
 setBitInteger (S# j) i
-    | i <# 0# = S# j
-    | i <# (WORD_SIZE_IN_BITS# -# 1#) =
+    | isTrue# (i <# 0#) = S# j
+    | isTrue# (i <# (WORD_SIZE_IN_BITS# -# 1#)) =
         let !mask = 1# `uncheckedIShiftL#` i in
         S# (word2Int# (int2Word# j `or#` int2Word# mask))
     | otherwise =
@@ -51,7 +57,7 @@ setBitInteger (J# s d) i =
 
 clearBitInteger :: Integer -> Int# -> Integer
 clearBitInteger (S# j) i
-    | i <# 0# || i >=# (WORD_SIZE_IN_BITS# -# 1#) = S# j
+    | isTrue# (i <# 0#) || isTrue# (i >=# (WORD_SIZE_IN_BITS# -# 1#)) = S# j
     | otherwise =
         let !mask =
                 int2Word# (1# `uncheckedIShiftL#` i) `xor#`
