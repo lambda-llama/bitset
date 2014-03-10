@@ -58,8 +58,8 @@ Test-suite bitset-tests
 
   Build-depends:      base                       >= 4.4.0 && < 4.8
                     , QuickCheck                 == 2.5.*
-                    , test-framework             == 0.6.*
-                    , test-framework-quickcheck2 == 0.2.*
+                    , test-framework             == 0.8.*
+                    , test-framework-quickcheck2 == 0.3.*
                     , bitset
 
 Benchmark bitset-benchmarks
