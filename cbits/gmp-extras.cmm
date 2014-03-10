@@ -1,4 +1,3 @@
-#if __GLASGOW_HASKELL__ >= 707
 #include "Cmm.h"
 #include "GmpDerivedConstants.h"
 
@@ -9,6 +8,8 @@ import "integer-gmp" __gmpz_init_set;
 import "integer-gmp" __gmpz_popcount;
 import "integer-gmp" __gmpz_setbit;
 import "integer-gmp" __gmpz_clrbit;
+
+#if __GLASGOW_HASKELL__ >= 707
 
 #define GMP_TAKE1_UL1_RET1(name,mp_fun)                         \
 name (W_ ws1, P_ d1, W_ wul)                                    \
@@ -65,17 +66,6 @@ again:
   return (TO_W_(res));
 }
 #else
-#include "Cmm.h"
-#include "GmpDerivedConstants.h"
-
-// TODO(superbobry): in the future release the syntax for calling
-// foreign funcations will CHANGE.
-
-import "integer-gmp" __gmpz_init_set;
-import "integer-gmp" __gmpz_popcount;
-import "integer-gmp" __gmpz_tstbit;
-import "integer-gmp" __gmpz_setbit;
-import "integer-gmp" __gmpz_clrbit;
 
 #define GMP_TAKE1_UL1_RET1(name,mp_fun)                         \
 name                                                            \
