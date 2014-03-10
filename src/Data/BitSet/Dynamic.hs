@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
@@ -118,11 +119,16 @@ instance Bits FasterInteger where
     popCount (FasterInteger x) = I# (popCountInteger x)
     {-# SPECIALIZE INLINE popCount :: FasterInteger -> Int #-}
 
+    isSigned = isSigned . unFI
+    {-# INLINE isSigned #-}
+
     bitSize = bitSize . unFI
     {-# INLINE bitSize #-}
 
-    isSigned = isSigned . unFI
-    {-# INLINE isSigned #-}
+#if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 707)
+    bitSizeMaybe = bitSizeMaybe . unFI
+    {-# INLINE bitSizeMaybe #-}
+#endif
 
 type BitSet = GS.BitSet FasterInteger
 
