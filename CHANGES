@@ -3,6 +3,11 @@ bitset Changelog
 
 Here you can see the full list of changes between each bitset release.
 
+Version 1.4.8
+
+- Add support for GHC 7.8
+- IsList instance for BitSet, so it's possible to use OverloadedLists extension.
+
 Version 1.4.7
 -------------
 
