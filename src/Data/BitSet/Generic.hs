@@ -107,10 +107,12 @@ instance (Enum a, Bits c, Num c) => Monoid (BitSet c a) where
     mempty  = empty
     mappend = union
 
+#if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 707)
 instance (Enum a, Bits c, Num c) => IsList (BitSet c a) where
     type Item (BitSet c a) = a
     fromList = fromList
     toList = toList
+#endif
 
 -- | /O(1)/. Is the bit set empty?
 null :: (Eq c, Num c) => BitSet c a -> Bool
