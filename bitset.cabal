@@ -57,9 +57,9 @@ Test-suite bitset-tests
   Main-is:            Tests.hs
 
   Build-depends:      base                       >= 4.4.0 && < 4.8
-                    , QuickCheck                 == 2.5.*
-                    , test-framework             == 0.8.*
-                    , test-framework-quickcheck2 == 0.3.*
+                    , QuickCheck                 == 2.6.*
+                    , tasty                      == 0.8.*
+                    , tasty-quickcheck           == 0.8.*
                     , bitset
 
 Benchmark bitset-benchmarks

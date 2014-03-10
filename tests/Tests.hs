@@ -12,8 +12,8 @@ import Data.Monoid ((<>), mempty)
 import Data.Word (Word16)
 import Foreign (Storable(..), allocaBytes)
 
-import Test.Framework (Test, testGroup, defaultMain)
-import Test.Framework.Providers.QuickCheck2 (testProperty)
+import Test.Tasty (TestTree, testGroup, defaultMain)
+import Test.Tasty.QuickCheck (testProperty)
 import Test.QuickCheck (Property, Arbitrary(..), (==>), classify)
 import Test.QuickCheck.Monadic (monadicIO, assert, run)
 
@@ -27,9 +27,6 @@ instance (Arbitrary a, Enum a) => Arbitrary (BitSet a) where
 
 instance (Arbitrary a, Enum a) => Arbitrary (GS.BitSet Word16 a) where
     arbitrary = GS.fromList <$> arbitrary
-
-instance Show (Word16 -> a) where
-    show = const "FUNCTION"
 
 instance Arbitrary FasterInteger where
     arbitrary = FasterInteger <$> arbitrary
@@ -225,13 +222,11 @@ propClearBit xfi i =
 
 main :: IO ()
 main = defaultMain tests where
-  tests :: [Test]
-  tests = [ testGroup "Data.BitSet" testsBitSet
-          , testGroup "GHC.Integer.GMP" testsFasterInteger
-          ]
+  tests :: TestTree
+  tests = testGroup "Tests" $ [ testsBitSet, testsFasterInteger]
 
-  testsBitSet :: [Test]
-  testsBitSet =
+  testsBitSet :: TestTree
+  testsBitSet = testGroup "Data.BitSet" $
       [ testProperty "size" propSize
       , testProperty "size after insert" propSizeAfterInsert
       , testProperty "size after delete" propSizeAfterDelete
@@ -258,8 +253,8 @@ main = defaultMain tests where
       , testProperty "storable instance" propStorable
       ]
 
-  testsFasterInteger :: [Test]
-  testsFasterInteger =
+  testsFasterInteger :: TestTree
+  testsFasterInteger = testGroup "GHC.Integer.GMP" $
       [
 #if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 706)
         testProperty "pop count" propPopCount
