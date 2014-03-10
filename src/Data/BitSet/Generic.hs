@@ -25,6 +25,8 @@
 -- independent of container choice, the maximum number of elements in a
 -- bit set is bounded by @maxBound :: Int@.
 
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -81,6 +83,10 @@ import Data.Data (Typeable)
 import Data.Monoid (Monoid(..))
 import Foreign (Storable)
 import GHC.Exts (build)
+#if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 707)
+import GHC.Exts (IsList)
+import qualified GHC.Exts as Exts
+#endif
 import Text.Read (Read(..), Lexeme(..), lexP, prec, parens)
 import qualified Data.List as List
 
@@ -100,6 +106,11 @@ instance (Enum a, Show a, Bits c,  Num c) => Show (BitSet c a) where
 instance (Enum a, Bits c, Num c) => Monoid (BitSet c a) where
     mempty  = empty
     mappend = union
+
+instance (Enum a, Bits c, Num c) => IsList (BitSet c a) where
+    type Item (BitSet c a) = a
+    fromList = fromList
+    toList = toList
 
 -- | /O(1)/. Is the bit set empty?
 null :: (Eq c, Num c) => BitSet c a -> Bool
