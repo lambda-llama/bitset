@@ -62,7 +62,7 @@ script:
  - cabal-1.18 build
 
  - run-cabal-test --cabal-name=cabal-1.18 --show-details=always
- - hpc-coveralls --exclude-dir=tests timeout-tests
+ - hpc-coveralls --exclude-dir=tests bitset-tests
 
  - cabal-1.18 check
 
