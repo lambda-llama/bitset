@@ -12,7 +12,7 @@
  * ------------------------------------------------------------------------*/
 
 #include <stdio.h>
-#include "./gmp.h"
+#include <gmp.h>
 
 
 #define str(a,b) #a "_" #b
@@ -60,8 +60,7 @@
     struct_field_macro(str(s_type,field))
 
 
-int
-main(int argc, char *argv[])
+int main(void)
 {
     printf("/* This file is created automatically.  Do not edit by hand.*/\n\n");
 
