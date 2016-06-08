@@ -2,6 +2,8 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
+#include <bitset.h>
+
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.BitSet.Dynamic
@@ -122,11 +124,10 @@ instance Bits FasterInteger where
     isSigned = isSigned . unFI
     {-# INLINE isSigned #-}
 
-    bitSize = bitSize . unFI
-    {-# INLINE bitSize #-}
+    bitSize _ = error "bitSize: FasterInteger does not support bitSize."
 
-#if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 707)
-    bitSizeMaybe = bitSizeMaybe . unFI
+#if MIN_VERSION_base(4,7,0)
+    bitSizeMaybe _ = Nothing
     {-# INLINE bitSizeMaybe #-}
 #endif
 

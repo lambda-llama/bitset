@@ -1,19 +1,19 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE FlexibleInstances #-}
 
 module Main (main) where
 
 import Control.Applicative ((<$>))
-import Data.Bits (popCount, testBit, setBit, clearBit)
+import Data.Bits (Bits, popCount, testBit, setBit, clearBit)
 import Data.Int (Int16)
 import Data.List ((\\), intersect, union, nub, sort)
 import Data.Monoid ((<>), mempty)
-import Data.Word (Word16)
+import Data.Word (Word, Word16)
 import Foreign (Storable(..), allocaBytes)
 
 import Test.Tasty (TestTree, testGroup, defaultMain)
 import Test.Tasty.QuickCheck (testProperty)
-import Test.QuickCheck (Property, Arbitrary(..), (==>), classify)
+import Test.QuickCheck (Property, Arbitrary(..), CoArbitrary (..), (==>), classify, (===), choose)
+import Test.QuickCheck.Function (Fun, Function (..), apply, functionMap)
 import Test.QuickCheck.Monadic (monadicIO, assert, run)
 
 import Data.BitSet (BitSet)
@@ -21,14 +21,22 @@ import Data.BitSet.Dynamic (FasterInteger(..))
 import qualified Data.BitSet as BS
 import qualified Data.BitSet.Generic as GS
 
-instance (Arbitrary a, Enum a) => Arbitrary (BitSet a) where
-    arbitrary = BS.fromList <$> arbitrary
-
-instance (Arbitrary a, Enum a) => Arbitrary (GS.BitSet Word16 a) where
+instance (Arbitrary a, Enum a, Bits b) => Arbitrary (GS.BitSet b a) where
     arbitrary = GS.fromList <$> arbitrary
 
 instance Arbitrary FasterInteger where
     arbitrary = FasterInteger <$> arbitrary
+
+-- QuickCheck 2.8 does not offer a Function instance
+-- for Word16 ( https://github.com/nick8325/quickcheck/issues/97 ).
+-- We use a wrapper to work around that.
+newtype Word16' = Word16' { getWord16 :: Word16 } deriving (Eq, Show)
+
+instance CoArbitrary Word16' where
+    coarbitrary = coarbitrary . getWord16
+
+instance Function Word16' where
+    function = functionMap (fromIntegral . getWord16) (Word16' . fromInteger)
 
 propSize :: [Word16] -> Bool
 propSize = go . nub where
@@ -163,11 +171,37 @@ propIsSubsetOf xs =
 propShowRead :: BitSet Word16 -> Bool
 propShowRead bs = bs == (read $ show bs)
 
-propMap :: BitSet Word16 -> (Word16 -> Word16) -> Bool
-propMap bs f = BS.map f bs == (BS.fromList $ map f $ BS.toList bs)
+propMap :: BitSet Word16 -> Fun Word16' Word16 -> Property
+propMap bs f = BS.map (apply f . Word16') bs === (BS.fromList $ map (apply f . Word16') $ BS.toList bs)
 
-propFilter :: BitSet Word16 -> (Word16 -> Bool) -> Bool
-propFilter bs f = BS.filter f bs == (BS.fromList $ filter f $ BS.toList bs)
+-- A little word, taking values in [0..15].
+data Little = Little {getLittle :: Word} deriving (Show, Eq)
+
+mkLittle :: Word -> Little
+mkLittle x
+  | 0 <= x && x < 16 = Little x
+  | otherwise = error "Little out of range."
+
+instance Enum Little where
+  toEnum = mkLittle . fromIntegral
+  fromEnum = fromIntegral . getLittle
+
+instance Arbitrary Little where
+    arbitrary = mkLittle <$> choose (0,15)
+
+instance CoArbitrary Little where
+    coarbitrary = coarbitrary . getLittle
+
+instance Function Little where
+    -- We use `mod` here instead of `rem` because we need a non-negative result.
+    -- It would be nicer to use "Euclidean" division, but speed is not important.
+    function = functionMap (fromIntegral . getLittle) (mkLittle . fromInteger . (`mod` 16))
+
+propMapWord16 :: GS.BitSet Word16 Little -> Fun Little Little -> Property
+propMapWord16 bs f = GS.map (apply f) bs === (GS.fromList $ map (apply f) $ GS.toList bs)
+
+propFilter :: BitSet Word16 -> Fun Word16' Bool -> Property
+propFilter bs f = BS.filter (apply f . Word16') bs === (BS.fromList $ filter (apply f . Word16') $ BS.toList bs)
 
 propStorable :: GS.BitSet Word16 Word16 -> Property
 propStorable storable = monadicIO $ do
@@ -180,12 +214,10 @@ propStorable storable = monadicIO $ do
     size = sizeOf storable
 
 
-#if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 706)
 propPopCount :: FasterInteger -> Property
-propPopCount xfi = xfi >= 0 ==> popCount xfi == popCount xi where
+propPopCount xfi = xfi >= 0 ==> popCount xfi === popCount xi where
   xi :: Integer
   xi = fromIntegral xfi
-#endif
 
 propTestBit :: FasterInteger -> Int16 -> Property
 propTestBit xfi i = xfi >= 0 ==> testBit xfi bit == testBit xi bit where
@@ -247,6 +279,7 @@ main = defaultMain tests where
       , testProperty "is subset of self" propIsSubsetOfSelf
       , testProperty "is subset of" propIsSubsetOf
       , testProperty "show read" propShowRead
+      , testProperty "map Word16" propMapWord16
       , testProperty "map" propMap
       , testProperty "filter" propFilter
       , testProperty "storable instance" propStorable
@@ -255,11 +288,8 @@ main = defaultMain tests where
   testsFasterInteger :: TestTree
   testsFasterInteger = testGroup "GHC.Integer.GMP" $
       [
-#if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 706)
         testProperty "pop count" propPopCount
-      ,
-#endif
-        testProperty "test bit" propTestBit
+      , testProperty "test bit" propTestBit
       , testProperty "set bit" propSetBit
       , testProperty "clear bit" propClearBit
       ]
