@@ -124,7 +124,7 @@ insert = GS.insert
 
 -- | /O(1)/. Delete an item from the bit set.
 delete :: Enum a => a -> BitSet a -> BitSet a
-delete = GS.delete
+delete x xs = GS.delete x xs
 {-# INLINE delete #-}
 
 -- | /O(1)/. The union of two bit sets.
@@ -149,7 +149,7 @@ intersection = GS.intersection
 -- | /O(n)/ Transform this bit set by applying a function to every value.
 -- Resulting bit set may be smaller then the original.
 map :: (Enum a, Enum b) => (a -> b) -> BitSet a -> BitSet b
-map = GS.map
+map f = GS.map f
 {-# INLINE map #-}
 
 -- | /O(n)/ Reduce this bit set by applying a binary function to all
@@ -157,27 +157,27 @@ map = GS.map
 -- operator is evaluated before before using the result in the next
 -- application.  This function is strict in the starting value.
 foldl' :: Enum a => (b -> a -> b) -> b -> BitSet a -> b
-foldl' = GS.foldl'
+foldl' f b xs = GS.foldl' f b xs
 {-# INLINE foldl' #-}
 
 -- | /O(n)/ Reduce this bit set by applying a binary function to all
 -- elements, using the given starting value.
 foldr :: Enum a => (a -> b -> b) -> b -> BitSet a -> b
-foldr = GS.foldr
+foldr c n xs = GS.foldr c n xs
 {-# INLINE foldr #-}
 
 -- | /O(n)/ Filter this bit set by retaining only elements satisfying a
 -- predicate.
 filter :: Enum a => (a -> Bool) -> BitSet a -> BitSet a
-filter = GS.filter
+filter f = GS.filter f
 {-# INLINE filter #-}
 
 -- | /O(n)/. Convert the bit set set to a list of elements.
 toList :: Enum a => BitSet a -> [a]
-toList = GS.toList
+toList xs = GS.toList xs
 {-# INLINE toList #-}
 
 -- | /O(n)/. Make a bit set from a list of elements.
 fromList :: Enum a => [a] -> BitSet a
-fromList = GS.fromList
+fromList xs = GS.fromList xs
 {-# INLINE fromList #-}
