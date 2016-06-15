@@ -257,13 +257,44 @@ filter f = foldl' (\bs x -> if f x then x `insert` bs else bs) empty
 
 -- | /O(d * n)/. Convert this bit set set to a list of elements.
 toList :: (Enum a, Bits c) => BitSet c a -> [a]
-toList bs = build (\k z -> foldr k z bs)
-{-# INLINE [0] toList #-}
+toList bs = foldr (:) [] bs
+{-# NOINLINE [0] toList #-}
+
+-- We rewrite toList to a `build` form to fuse with `foldr`. We write
+-- `fromList` using a `foldr` form to fuse with `build` and `augment`. The
+-- fromList/toList rule is more general than the old `fromList . toList = id`
+-- rule. This extra generality fell out naturally from the rule construction,
+-- but it seems to be at least somewhat useful; for example, `fromList $ toList
+-- xs ++ toList ys` rewrites to the union of `xs` and `ys`.
+{-# RULES
+"toList" [~1] forall bs . toList bs = build (toListFB bs)
+"toList/List" [1] forall bs . toListFB bs (:) [] = toList bs
+"fromList/toList" forall bs f cs. toListFB bs fromListFB f cs =
+                      f $! union bs cs
+ #-}
+
+{-
+Explanation of fromList/toList rule:
+
+toListFB bs fromListFB f cs =
+foldr fromListFB f bs cs =
+foldr (\x r -> \ !acc -> r (insert x acc)) f bs cs =
+foldr (\x r !acc -> r (insert x acc)) f bs cs
+
+This last form inserts each element of `bs` into `cs`, accumulating strictly,
+then applies `f` to the final result. This is just the same as taking their
+*union* and applying `f` to it.
+-}
+
+toListFB :: (Enum a, Bits c) => BitSet c a -> (a -> b -> b) -> b -> b
+toListFB bs = \k z -> foldr k z bs
+{-# INLINE [0] toListFB #-}
 
 -- | /O(d * n)/. Make a bit set from a list of elements.
 fromList :: (Enum a, Bits c) => [a] -> BitSet c a
-fromList = List.foldl' (\i x -> insert x i) empty
-{-# INLINE [0] fromList #-}
-{-# RULES
-"fromList/toList"    forall bs. fromList (toList bs) = bs
-  #-}
+fromList xs = List.foldr fromListFB id xs empty
+{-# INLINE fromList #-}
+
+fromListFB :: (Enum a, Bits c) => a -> (BitSet c a -> b) -> BitSet c a -> b
+fromListFB x r = \ !acc -> r (insert x acc)
+{-# INLINE [0] fromListFB #-}

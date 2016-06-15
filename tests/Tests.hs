@@ -77,6 +77,24 @@ propInsertIdempotent :: Word16 -> BitSet Word16 -> Bool
 propInsertIdempotent x bs =
     BS.insert x bs == BS.insert x (BS.insert x bs)
 
+-- A copy of fromList marked NOINLINE to ensure it is not
+-- affected by RULES.
+fromListNOINLINE :: (Bits i, Enum e) => [e] -> GS.BitSet i e
+fromListNOINLINE = GS.fromList
+{-# NOINLINE fromListNOINLINE #-}
+
+-- A copy of toList marked NOINLINE to ensure it is not
+-- affected by RULES.
+toListNOINLINE :: (Bits i, Enum e) => GS.BitSet i e -> [e]
+toListNOINLINE = GS.toList
+{-# NOINLINE toListNOINLINE #-}
+
+propFromDotToList :: BitSet Word16 -> Property
+propFromDotToList x = x === fromListNOINLINE (toListNOINLINE x)
+
+propFromDotToListRULES :: BitSet Word16 -> Property
+propFromDotToListRULES x = x === BS.fromList (BS.toList x)
+
 propToList :: [Word16] -> Bool
 propToList xs = nub (sort xs) == BS.toList bs where
   bs :: BitSet Word16
@@ -197,6 +215,8 @@ instance Function Little where
     -- It would be nicer to use "Euclidean" division, but speed is not important.
     function = functionMap (fromIntegral . getLittle) (mkLittle . fromInteger . (`mod` 16))
 
+-- This tests the case of a bitset backed by a small unsigned
+-- Bits instance.
 propMapWord16 :: GS.BitSet Word16 Little -> Fun Little Little -> Property
 propMapWord16 bs f = GS.map (apply f) bs === (GS.fromList $ map (apply f) $ GS.toList bs)
 
@@ -268,6 +288,8 @@ main = defaultMain tests where
       , testProperty "insert is idempotent" propInsertIdempotent
       , testProperty "toList" propToList
       , testProperty "fromList" propFromList
+      , testProperty "fromListInvertsToList" propFromDotToList
+      , testProperty "fromListInvertsToListRULES" propFromDotToListRULES
       , testProperty "empty" propEmpty
       , testProperty "native empty is null" propNullEmpty
       , testProperty "generated empty is null" propNullAfterDelete
