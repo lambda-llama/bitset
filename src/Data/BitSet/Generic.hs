@@ -25,14 +25,6 @@
 -- independent of container choice, the maximum number of elements in a
 -- bit set is bounded by @maxBound :: Int@.
 
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
-#include <bitset.h>
-
 module Data.BitSet.Generic
     (
     -- * Bit set type
@@ -77,15 +69,11 @@ module Data.BitSet.Generic
 
 import Prelude hiding (null, map, filter, foldr)
 
-import Control.Applicative ((<$>))
 import Control.DeepSeq (NFData(..))
 import Data.Bits (Bits, (.|.), (.&.), complement, bit,
                   testBit, setBit, clearBit, popCount)
-#if MIN_VERSION_base(4,7,0)
 import Data.Bits (bitSizeMaybe, isSigned, unsafeShiftR, zeroBits)
-#endif
 import Data.Data (Typeable)
-import Data.Monoid (Monoid(..))
 import Foreign (Storable)
 import GHC.Exts (build)
 #if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 707)
@@ -108,9 +96,11 @@ instance (Enum a, Show a, Bits c) => Show (BitSet c a) where
     showsPrec p bs = showParen (p > 10) $
                      showString "fromList " . shows (toList bs)
 
+instance Bits c => Semigroup (BitSet c a) where
+    (<>) = union
+
 instance Bits c => Monoid (BitSet c a) where
     mempty  = empty
-    mappend = union
 
 #if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 707)
 instance (Enum a, Bits c) => IsList (BitSet c a) where
