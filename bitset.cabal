@@ -15,7 +15,7 @@ Author:               Sergei Lebedev <superbobry@gmail.com>
 Maintainer:           superbobry@gmail.com
 Bug-reports:          http://github.com/lambda-llama/bitset/issues
 Stability:            Experimental
-Tested-with:          GHC == 8.4, GHC == 8.6, GHC == 8.8, GHC == 8.10
+Tested-with:          GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.4, GHC == 8.10.4
 
 Source-repository head
   Type:     git
