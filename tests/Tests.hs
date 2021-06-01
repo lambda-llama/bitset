@@ -2,12 +2,10 @@
 
 module Main (main) where
 
-import Control.Applicative ((<$>))
 import Data.Bits (Bits, popCount, testBit, setBit, clearBit)
 import Data.Int (Int16)
 import Data.List ((\\), intersect, union, nub, sort)
-import Data.Monoid ((<>), mempty)
-import Data.Word (Word, Word16)
+import Data.Word (Word16)
 import Foreign (Storable(..), allocaBytes)
 
 import Test.Tasty (TestTree, testGroup, defaultMain)
