@@ -29,7 +29,7 @@ Common common-options
                       GeneralizedNewtypeDeriving, TypeFamilies,
                       DeriveDataTypeable
 
-  Build-depends:      base                       >= 4.8.0
+  Build-depends:      base                       >= 4.8.0 && < 5.0
 
 Library
   Import:             common-options
@@ -45,33 +45,26 @@ Library
                     , Data.BitSet.Word
 
 Test-suite bitset-tests
+  Import:             common-options
   Hs-source-dirs:     tests
-  Ghc-options:        -Wall -O2 -fno-warn-orphans
-  Default-language:   Haskell2010
-  Other-extensions:   CPP
 
   Type:               exitcode-stdio-1.0
   Main-is:            Tests.hs
 
-  Build-depends:      base
+  Build-depends:      bitset
                     , QuickCheck
                     , tasty
                     , tasty-quickcheck
-                    , bitset
 
 Benchmark bitset-benchmarks
   Import:             common-options
-  Hs-source-dirs:     src benchmarks
-  Ghc-options:        -O2
+  Hs-source-dirs:     benchmarks
 
   Type:               exitcode-stdio-1.0
   Main-is:            Benchmarks.hs
 
-  Build-depends:      base
+  Build-depends:      bitset
                     , deepseq
-                    , integer-gmp
-                    , ghc-prim
-
                     , criterion
                     , containers
                     , random
