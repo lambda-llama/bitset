@@ -70,8 +70,6 @@ module Data.BitSet.Word
 
 import Prelude hiding (null, map, filter, foldr)
 
-import Data.Word (Word)
-
 import qualified Data.BitSet.Generic as GS
 
 type BitSet = GS.BitSet Word

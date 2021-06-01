@@ -1,9 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE MagicHash #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
-#include <bitset.h>
-
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.BitSet.Dynamic
@@ -75,61 +69,15 @@ module Data.BitSet.Dynamic
 import Prelude hiding (null, map, filter, foldr)
 
 import Data.Bits (Bits(..))
-import GHC.Base (Int(..))
 
 import Control.DeepSeq (NFData(..))
 
-import GHC.Integer.GMP.TypeExt (popCountInteger, testBitInteger,
-                                setBitInteger, clearBitInteger)
 import qualified Data.BitSet.Generic as GS
+
 
 -- | A wrapper around 'Integer' which provides faster bit-level operations.
 newtype FasterInteger = FasterInteger { unFI :: Integer }
-    deriving (Read, Show, Eq, Ord, Enum, Integral, Num, Real, NFData)
-
-instance Bits FasterInteger where
-    FasterInteger x .&. FasterInteger y = FasterInteger $ x .&. y
-    {-# INLINE (.&.) #-}
-
-    FasterInteger x .|. FasterInteger y = FasterInteger $ x .|. y
-    {-# INLINE (.|.) #-}
-
-    FasterInteger x `xor` FasterInteger y = FasterInteger $ x `xor` y
-    {-# INLINE xor #-}
-
-    complement = FasterInteger . complement . unFI
-    {-# INLINE complement #-}
-
-    shift (FasterInteger x) = FasterInteger . shift x
-    {-# INLINE shift #-}
-
-    rotate (FasterInteger x) = FasterInteger . rotate x
-    {-# INLINE rotate #-}
-
-    bit = FasterInteger . bit
-    {-# INLINE bit #-}
-
-    testBit (FasterInteger x) (I# i) = testBitInteger x i
-    {-# SPECIALIZE INLINE testBit :: FasterInteger -> Int -> Bool #-}
-
-    setBit (FasterInteger x) (I# i) = FasterInteger $ setBitInteger x i
-    {-# SPECIALIZE INLINE setBit :: FasterInteger -> Int -> FasterInteger #-}
-
-    clearBit (FasterInteger x) (I# i) = FasterInteger $ clearBitInteger x i
-    {-# SPECIALIZE INLINE clearBit :: FasterInteger -> Int -> FasterInteger #-}
-
-    popCount (FasterInteger x) = I# (popCountInteger x)
-    {-# SPECIALIZE INLINE popCount :: FasterInteger -> Int #-}
-
-    isSigned = isSigned . unFI
-    {-# INLINE isSigned #-}
-
-    bitSize _ = error "bitSize: FasterInteger does not support bitSize."
-
-#if MIN_VERSION_base(4,7,0)
-    bitSizeMaybe _ = Nothing
-    {-# INLINE bitSizeMaybe #-}
-#endif
+    deriving (Read, Show, Eq, Ord, Enum, Integral, Num, Real, NFData, Bits)
 
 type BitSet = GS.BitSet FasterInteger
 
