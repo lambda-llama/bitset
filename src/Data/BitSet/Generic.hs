@@ -70,16 +70,14 @@ module Data.BitSet.Generic
 import Prelude hiding (null, map, filter, foldr)
 
 import Control.DeepSeq (NFData(..))
-import Data.Bits (Bits, (.|.), (.&.), complement, bit,
-                  testBit, setBit, clearBit, popCount)
-import Data.Bits (bitSizeMaybe, isSigned, unsafeShiftR, zeroBits)
+import Data.Bits (Bits, (.|.), (.&.), complement,
+                  bit, testBit, setBit, clearBit,
+                  popCount, bitSizeMaybe, isSigned,
+                  unsafeShiftR, zeroBits)
 import Data.Data (Typeable)
 import Foreign (Storable)
-import GHC.Exts (build)
-#if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 707)
-import GHC.Exts (IsList)
+import GHC.Exts (build, IsList)
 import qualified GHC.Exts as Exts
-#endif
 import Text.Read (Read(..), Lexeme(..), lexP, prec, parens)
 import qualified Data.List as List
 
@@ -102,18 +100,10 @@ instance Bits c => Semigroup (BitSet c a) where
 instance Bits c => Monoid (BitSet c a) where
     mempty  = empty
 
-#if defined(__GLASGOW_HASKELL__) && (__GLASGOW_HASKELL__ >= 707)
 instance (Enum a, Bits c) => IsList (BitSet c a) where
     type Item (BitSet c a) = a
     fromList = fromList
     toList = toList
-#endif
-
-#if !MIN_VERSION_base(4,7,0)
-zeroBits :: Bits c => c
-zeroBits = bit 0 `clearBit` 0
-{-# INLINE zeroBits #-}
-#endif
 
 -- | /O(1)/. Is the bit set empty?
 null :: Bits c => BitSet c a -> Bool
@@ -196,7 +186,6 @@ map f = foldl' (\bs -> (`insert` bs) . f) empty
 -- operator is evaluated before before using the result in the next
 -- application.  This function is strict in the starting value.
 foldl' :: (Enum a, Bits c) => (b -> a -> b) -> b -> BitSet c a -> b
-#if MIN_VERSION_base(4,7,0)
 -- If the bit set is represented by an unsigned type
 -- then we can shift the bits off one by one until we're
 -- left with all zeros. If the type is fairly narrow, then
@@ -211,7 +200,7 @@ foldl' f acc0 (BitSet bits0)
       | bits == zeroBits = acc
       | bits `testBit` 0 = go (f acc $ toEnum b) (bits `unsafeShiftR` 1) (b + 1)
       | otherwise = go acc (bits `unsafeShiftR` 1) (b + 1)
-#endif
+
 foldl' f acc0 (BitSet bits) = go acc0 (popCount bits) 0
   where
     go !acc 0 !_b = acc
@@ -223,7 +212,6 @@ foldl' f acc0 (BitSet bits) = go acc0 (popCount bits) 0
 -- | /O(d * n)/ Reduce this bit set by applying a binary function to
 -- all elements, using the given starting value.
 foldr :: (Enum a, Bits c) => (a -> b -> b) -> b -> BitSet c a -> b
-#if MIN_VERSION_base(4,7,0)
 foldr f acc0 (BitSet bits0)
   | not (isSigned bits0) && maybe False (<= 128) (bitSizeMaybe bits0) = go bits0 0
   where
@@ -231,7 +219,7 @@ foldr f acc0 (BitSet bits0)
       | bits == zeroBits = acc0
       | bits `testBit` 0 = toEnum b `f` go (bits `unsafeShiftR` 1) (b + 1)
       | otherwise = go (bits `unsafeShiftR` 1) (b + 1)
-#endif
+
 foldr f acc0 (BitSet bits) = go (popCount bits) 0 where
   go 0 _b = acc0
   go !n b = if bits `testBit` b
