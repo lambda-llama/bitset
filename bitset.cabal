@@ -15,7 +15,7 @@ Author:               Sergei Lebedev <superbobry@gmail.com>
 Maintainer:           superbobry@gmail.com
 Bug-reports:          http://github.com/lambda-llama/bitset/issues
 Stability:            Experimental
-Tested-with:          GHC == 7.4.1, GHC == 7.6.3, GHC == 7.8.4
+Tested-with:          GHC == 8.4, GHC == 8.6, GHC == 8.8, GHC == 8.10
 
 Source-repository head
   Type:     git
@@ -29,7 +29,7 @@ Common common-options
                       GeneralizedNewtypeDeriving, TypeFamilies,
                       DeriveDataTypeable
 
-  Build-depends:      base                       >= 4.4.0
+  Build-depends:      base                       >= 4.8.0
 
 Library
   Import:             common-options
